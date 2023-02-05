@@ -6,9 +6,14 @@ import (
 )
 
 type logical struct {
+	kind     Kind
 	operator string
 	operands []Evaluable
 	handler  func(Context, []Evaluable) (bool, error)
+}
+
+func (l logical) Kind() Kind {
+	return l.kind
 }
 
 func (l logical) Evaluate(ctx Context) (any, error) {
@@ -39,6 +44,6 @@ func Evaluate(ctx Context, o Evaluable) (bool, error) {
 	}
 }
 
-func New(op string, operands []Evaluable, handler func(Context, []Evaluable) (bool, error)) (Evaluable, error) {
-	return logical{operator: op, operands: operands, handler: handler}, nil
+func New(kind Kind, op string, operands []Evaluable, handler func(Context, []Evaluable) (bool, error)) (Evaluable, error) {
+	return logical{kind: kind, operator: op, operands: operands, handler: handler}, nil
 }

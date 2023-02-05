@@ -32,5 +32,5 @@ func New(operands []Evaluable) (Evaluable, error) {
 		return nil, errors.New("logical XOR expression must have at least 2 operands")
 	}
 
-	return l.New("XOR", operands, handler)
+	return l.New(Xor, "XOR", operands, handler)
 }

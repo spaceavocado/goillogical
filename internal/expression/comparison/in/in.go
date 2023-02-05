@@ -35,5 +35,5 @@ func handler(evaluated []any) bool {
 }
 
 func New(left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New("<in>", []Evaluable{left, right}, handler)
+	return c.New(In, "<in>", []Evaluable{left, right}, handler)
 }

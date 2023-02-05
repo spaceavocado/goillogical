@@ -11,9 +11,14 @@ type Number interface {
 }
 
 type comparison struct {
+	kind     Kind
 	operator string
 	operands []Evaluable
 	handler  func([]any) bool
+}
+
+func (c comparison) Kind() Kind {
+	return c.kind
 }
 
 func (c comparison) Evaluate(ctx Context) (any, error) {
@@ -51,6 +56,6 @@ func IsComparable(left any, right any) bool {
 	return true
 }
 
-func New(op string, operands []Evaluable, handler func([]any) bool) (Evaluable, error) {
+func New(kind Kind, op string, operands []Evaluable, handler func([]any) bool) (Evaluable, error) {
 	return comparison{operator: op, operands: operands, handler: handler}, nil
 }

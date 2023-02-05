@@ -5,13 +5,25 @@ import (
 	. "goillogical/internal"
 )
 
+type SerializeOptions struct {
+	EscapedOperators map[string]bool
+	EscapeCharacter  string
+}
+
+func DefaultSerializeOptions() SerializeOptions {
+	return SerializeOptions{
+		EscapedOperators: map[string]bool{},
+		EscapeCharacter:  "\\",
+	}
+}
+
 type collection struct {
 	items []Evaluable
 }
 
-// func (c collection) Kind() Kind {
-// 	return Collection
-// }
+func (c collection) Kind() Kind {
+	return Collection
+}
 
 func (c collection) Evaluate(ctx Context) (any, error) {
 	res := make([]any, len(c.items))
@@ -33,10 +45,6 @@ func (c collection) String() string {
 	res += "]"
 	return res
 }
-
-// func isCollection(e Evaluable) bool {
-// 	return e.Kind() == Collection
-// }
 
 func New(items []Evaluable) (Evaluable, error) {
 	if len(items) == 0 {

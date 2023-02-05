@@ -1,4 +1,4 @@
-package notin
+package nin
 
 import (
 	. "goillogical/internal"
@@ -35,5 +35,5 @@ func handler(evaluated []any) bool {
 }
 
 func New(left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New("<not in>", []Evaluable{left, right}, handler)
+	return c.New(Nin, "<not in>", []Evaluable{left, right}, handler)
 }

@@ -11,9 +11,9 @@ type value struct {
 	val any
 }
 
-// func (v value) Kind() Kind {
-// 	return Value
-// }
+func (v value) Kind() Kind {
+	return Value
+}
 
 func (v value) String() string {
 	switch v.val.(type) {

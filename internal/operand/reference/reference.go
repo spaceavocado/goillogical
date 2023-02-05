@@ -11,10 +11,29 @@ import (
 	"regexp"
 )
 
+type SerializeOptions struct {
+	From func(operand string) (string, error)
+	To   func(operand string) string
+}
+
+func DefaultSerializeOptions() SerializeOptions {
+	return SerializeOptions{
+		From: func(operand string) (string, error) {
+			if len(operand) > 1 && strings.HasPrefix(operand, "$") {
+				return operand[1:], nil
+			}
+			return "", errors.New("invalid operand")
+		},
+		To: func(operand string) string {
+			return fmt.Sprintf("$%s", operand)
+		},
+	}
+}
+
 type DataType byte
 
 const (
-	Unknown DataType = iota
+	Undefined DataType = iota
 	Number
 	Integer
 	Float
@@ -28,9 +47,9 @@ type reference struct {
 	dt   DataType
 }
 
-// func (v reference) Kind() Kind {
-// 	return Reference
-// }
+func (v reference) Kind() Kind {
+	return Reference
+}
 
 func (r reference) String() string {
 	return fmt.Sprintf("{%s}", r.addr)
@@ -57,10 +76,10 @@ func getDataType(path string) (DataType, error) {
 		case "Boolean":
 			return Boolean, nil
 		default:
-			return Unknown, errors.New(fmt.Sprintf("unsupported \"%s\" type casting", matches[1]))
+			return Undefined, errors.New(fmt.Sprintf("unsupported \"%s\" type casting", matches[1]))
 		}
 	}
-	return Unknown, nil
+	return Undefined, nil
 }
 
 func trimDataType(path string) string {

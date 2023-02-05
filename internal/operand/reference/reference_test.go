@@ -3,7 +3,7 @@ package reference
 import (
 	"errors"
 	"fmt"
-	. "goillogical/internal"
+	i "goillogical/internal"
 	"reflect"
 	"testing"
 )
@@ -13,8 +13,8 @@ func TestGetDataType(t *testing.T) {
 		input    string
 		expected DataType
 	}{
-		{"ref", Unknown},
-		{"ref.(X)", Unknown},
+		{"ref", Undefined},
+		{"ref.(X)", Undefined},
 		{"ref.(String)", String},
 		{"ref.(Number)", Number},
 		{"ref.(Integer)", Integer},
@@ -210,8 +210,8 @@ func TestToString(t *testing.T) {
 
 func TestFlattenContext(t *testing.T) {
 	var tests = []struct {
-		input    Context
-		expected Context
+		input    i.Context
+		expected i.Context
 	}{
 		{map[string]any{"a": 1}, map[string]any{"a": 1}},
 		{map[string]any{"a": 1, "b": map[string]any{"c": 5, "d": true}}, map[string]any{"a": 1, "b.c": 5, "b.d": true}},
@@ -292,7 +292,7 @@ func TestEvaluate(t *testing.T) {
 		dt    DataType
 		value any
 	}{
-		{"refA", Unknown, 1},
+		{"refA", Undefined, 1},
 		{"refA", String, "1"},
 		{"refG", Number, 1},
 		{"refH", Number, 1.1},
@@ -311,7 +311,7 @@ func TestEvaluate(t *testing.T) {
 		dt       DataType
 		expected error
 	}{
-		{"refB", Unknown, errors.New("invalid evaluated value at \"refB\" path")},
+		{"refB", Undefined, errors.New("invalid evaluated value at \"refB\" path")},
 	}
 	for _, test := range errs {
 		if _, _, err := evaluate(ctx, test.path, test.dt); err.Error() != test.expected.Error() {
