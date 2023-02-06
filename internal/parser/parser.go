@@ -3,7 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
-	o "goillogical"
+	. "goillogical"
 	. "goillogical/internal"
 	eq "goillogical/internal/expression/comparison/eq"
 	ge "goillogical/internal/expression/comparison/ge"
@@ -30,7 +30,7 @@ import (
 	"strings"
 )
 
-type Options struct {
+type options struct {
 	OperatorHandlers          map[string]func([]Evaluable) (Evaluable, error)
 	EscapeCharacter           string
 	ReferenceSerializeOptions reference.SerializeOptions
@@ -84,7 +84,7 @@ type Parser interface {
 }
 
 type parser struct {
-	opts Options
+	opts options
 }
 
 func (p parser) Parse(exp any) (Evaluable, error) {
@@ -104,7 +104,7 @@ func toReferenceAddr(input any, opts reference.SerializeOptions) (string, error)
 	}
 }
 
-func createOperand(input any, opts Options) (Evaluable, error) {
+func createOperand(input any, opts options) (Evaluable, error) {
 	if input == nil {
 		return nil, errors.New("invalid undefined operand")
 	}
@@ -139,7 +139,7 @@ func createOperand(input any, opts Options) (Evaluable, error) {
 	return value.New(input)
 }
 
-func createExpression(expression []any, opts Options) (Evaluable, error) {
+func createExpression(expression []any, opts options) (Evaluable, error) {
 	operator := expression[0]
 	operands := expression[1:]
 	switch operator.(type) {
@@ -164,7 +164,7 @@ func createExpression(expression []any, opts Options) (Evaluable, error) {
 	}
 }
 
-func parse(input any, opts Options) (Evaluable, error) {
+func parse(input any, opts options) (Evaluable, error) {
 	t := reflect.TypeOf(input).Kind()
 	if t != reflect.Slice {
 		return createOperand(input, opts)
@@ -178,7 +178,7 @@ func parse(input any, opts Options) (Evaluable, error) {
 
 	operator := v.Index(0).Interface()
 	if isEscaped(fmt.Sprintf("%v", operator), opts.EscapeCharacter) {
-		return createOperand(append([]any{operator.(string)[1:]}, v.Slice(1, v.Len())), opts)
+		return createOperand(append([]any{operator.(string)[1:]}, v.Slice(1, v.Len()).Interface().([]any)...), opts)
 	}
 
 	e, err := createExpression(input.([]any), opts)
@@ -189,8 +189,8 @@ func parse(input any, opts Options) (Evaluable, error) {
 	return e, nil
 }
 
-func New(opts o.Options) Parser {
-	return &parser{opts: Options{
+func New(opts Options) Parser {
+	return &parser{opts: options{
 		OperatorHandlers:          operatorHandlers(opts.OperatorMapping),
 		ReferenceSerializeOptions: opts.Serialize.Reference,
 		EscapeCharacter:           opts.Serialize.Collection.EscapeCharacter,
