@@ -35,8 +35,8 @@ func TestString(t *testing.T) {
 		operands []Evaluable
 		expected string
 	}{
-		{"==", []Evaluable{e1, e2}, "e1 == e2"},
-		{"==", []Evaluable{e1, e2, e1}, "e1 == e2, e1"},
+		{"==", []Evaluable{e1, e2}, "(e1 == e2)"},
+		{"<nil>", []Evaluable{e1}, "(e1 <nil>)"},
 	}
 
 	for _, test := range tests {

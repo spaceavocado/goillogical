@@ -34,14 +34,11 @@ func (c comparison) Evaluate(ctx Context) (any, error) {
 }
 
 func (c comparison) String() string {
-	res := fmt.Sprintf("%s %s", c.operands[0].String(), c.operator)
-	for i := 1; i < len(c.operands); i++ {
-		if i > 1 {
-			res += ","
-		}
-		res += fmt.Sprintf(" %s", c.operands[i].String())
+	res := fmt.Sprintf("(%s %s", c.operands[0].String(), c.operator)
+	if len(c.operands) > 1 {
+		res += fmt.Sprintf(" %s", c.operands[1].String())
 	}
-	return res
+	return res + ")"
 }
 
 func IsComparable(left any, right any) bool {

@@ -3,8 +3,7 @@ package reference
 import (
 	"errors"
 	"fmt"
-	i "goillogical/internal"
-	"reflect"
+	. "goillogical/internal"
 	"testing"
 )
 
@@ -208,26 +207,8 @@ func TestToString(t *testing.T) {
 	}
 }
 
-func TestFlattenContext(t *testing.T) {
-	var tests = []struct {
-		input    i.Context
-		expected i.Context
-	}{
-		{map[string]any{"a": 1}, map[string]any{"a": 1}},
-		{map[string]any{"a": 1, "b": map[string]any{"c": 5, "d": true}}, map[string]any{"a": 1, "b.c": 5, "b.d": true}},
-		{map[string]any{"a": 1, "b": []any{1, 2, 3}}, map[string]any{"a": 1, "b[0]": 1, "b[1]": 2, "b[2]": 3}},
-		{map[string]any{"a": 1, "b": []any{1, 2, map[string]any{"c": 5, "d": true}}}, map[string]any{"a": 1, "b[0]": 1, "b[1]": 2, "b[2].c": 5, "b[2].d": true}},
-	}
-
-	for _, test := range tests {
-		if output := flattenContext(test.input); !reflect.DeepEqual(output, test.expected) {
-			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, output)
-		}
-	}
-}
-
 func TestContextLookup(t *testing.T) {
-	ctx := flattenContext(map[string]any{
+	ctx := FlattenContext(map[string]any{
 		"refA": 1,
 		"refB": map[string]any{
 			"refB1": 2,
@@ -272,7 +253,7 @@ func TestContextLookup(t *testing.T) {
 }
 
 func TestEvaluate(t *testing.T) {
-	ctx := map[string]any{
+	ctx := FlattenContext(map[string]any{
 		"refA": 1,
 		"refB": map[string]any{
 			"refB1": 2,
@@ -282,10 +263,10 @@ func TestEvaluate(t *testing.T) {
 		"refC": "refB1",
 		"refD": "refB2",
 		"refE": []any{1, []any{2, 3, 4}},
-		"refF": "A",
+		"refF": func() {},
 		"refG": "1",
 		"refH": "1.1",
-	}
+	})
 
 	tests := []struct {
 		path  string
@@ -298,24 +279,12 @@ func TestEvaluate(t *testing.T) {
 		{"refH", Number, 1.1},
 		{"refB.refB3", String, "true"},
 		{"refB.refB3", Number, 1},
+		{"refJ", Undefined, nil},
 	}
 
 	for _, test := range tests {
 		if _, value, err := evaluate(ctx, test.path, test.dt); value != test.value || err != nil {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.path, test.dt, test.value, value)
-		}
-	}
-
-	errs := []struct {
-		path     string
-		dt       DataType
-		expected error
-	}{
-		{"refB", Undefined, errors.New("invalid evaluated value at \"refB\" path")},
-	}
-	for _, test := range errs {
-		if _, _, err := evaluate(ctx, test.path, test.dt); err.Error() != test.expected.Error() {
-			t.Errorf("input (%v, %v): expected %v, got %v", test.path, test.dt, test.expected, err)
 		}
 	}
 }

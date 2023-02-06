@@ -1,0 +1,24 @@
+package internal
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestFlattenContext(t *testing.T) {
+	var tests = []struct {
+		input    Context
+		expected Context
+	}{
+		{map[string]any{"a": 1}, map[string]any{"a": 1}},
+		{map[string]any{"a": 1, "b": map[string]any{"c": 5, "d": true}}, map[string]any{"a": 1, "b.c": 5, "b.d": true}},
+		{map[string]any{"a": 1, "b": []any{1, 2, 3}}, map[string]any{"a": 1, "b[0]": 1, "b[1]": 2, "b[2]": 3}},
+		{map[string]any{"a": 1, "b": []any{1, 2, map[string]any{"c": 5, "d": true}}}, map[string]any{"a": 1, "b[0]": 1, "b[1]": 2, "b[2].c": 5, "b[2].d": true}},
+	}
+
+	for _, test := range tests {
+		if output := FlattenContext(test.input); !reflect.DeepEqual(output, test.expected) {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, output)
+		}
+	}
+}

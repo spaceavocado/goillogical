@@ -20,7 +20,7 @@ func (v value) String() string {
 	case string:
 		return fmt.Sprintf("\"%s\"", v.val)
 	default:
-		return fmt.Sprintf("%s", v.val)
+		return fmt.Sprintf("%v", v.val)
 	}
 }
 
@@ -30,7 +30,7 @@ func (v value) Evaluate(ctx Context) (any, error) {
 
 func isPrimitive(v any) bool {
 	switch v.(type) {
-	case string, int, float32, float64, bool:
+	case string, int, int8, int16, int32, int64, float32, float64, bool:
 		return true
 	default:
 		return false
@@ -39,7 +39,7 @@ func isPrimitive(v any) bool {
 
 func New(val any) (Evaluable, error) {
 	if !isPrimitive(val) {
-		return nil, errors.New("value could be only primitive type, string, int or bool")
+		return nil, errors.New("value could be only primitive type, string, number or bool")
 	}
 	return value{val}, nil
 }
