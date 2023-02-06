@@ -28,6 +28,10 @@ func (v value) Evaluate(ctx Context) (any, error) {
 	return v.val, nil
 }
 
+func (v value) Serialize() any {
+	return v.val
+}
+
 func isPrimitive(v any) bool {
 	switch v.(type) {
 	case string, int, int8, int16, int32, int64, float32, float64, bool:

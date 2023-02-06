@@ -17,6 +17,10 @@ func (m evaluableMock) Evaluate(ctx Context) (any, error) {
 	return m.val, nil
 }
 
+func (m evaluableMock) Serialize() any {
+	return m.val
+}
+
 func EvaluableMock(val any, str string) Evaluable {
 	return evaluableMock{val, str}
 }

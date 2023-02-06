@@ -19,7 +19,7 @@ func TestEvaluate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New(Unknown, test.op, test.operands, func(evaluated []any) bool { return evaluated[0] == evaluated[1] })
+		c, _ := New("Unknown", test.op, test.operands, func(evaluated []any) bool { return evaluated[0] == evaluated[1] })
 		if output, err := c.Evaluate(map[string]any{}); output != test.expected || err != nil {
 			t.Errorf("input (%v, %v): expected %v, got %v/%v", test.op, test.operands, test.expected, output, err)
 		}
@@ -40,7 +40,7 @@ func TestString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New(Unknown, test.op, test.operands, func(evaluated []any) bool { return false })
+		c, _ := New("Unknown", test.op, test.operands, func(evaluated []any) bool { return false })
 		if output := c.String(); output != test.expected {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
 		}

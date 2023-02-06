@@ -38,25 +38,27 @@ func addr(val string, opts Options) string {
 }
 
 func ref(val string) Evaluable {
-	e, _ := reference.New(val)
+	opts := reference.DefaultSerializeOptions()
+	e, _ := reference.New(val, &opts)
 	return e
 }
 
 func col(items ...Evaluable) Evaluable {
-	e, _ := collection.New(items)
+	opts := collection.DefaultSerializeOptions()
+	e, _ := collection.New(items, &opts)
 	return e
 }
 
-func expUnary(factory func(Evaluable) (Evaluable, error), eval Evaluable) Evaluable {
-	e, _ := factory(eval)
+func expUnary(op string, factory func(string, Evaluable) (Evaluable, error), eval Evaluable) Evaluable {
+	e, _ := factory(op, eval)
 	return e
 }
-func expBinary(factory func(Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
-	e, _ := factory(left, right)
+func expBinary(op string, factory func(string, Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
+	e, _ := factory(op, left, right)
 	return e
 }
-func expMany(factory func([]Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
-	e, _ := factory(operands)
+func expMany(op string, factory func(string, []Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
+	e, _ := factory(op, operands)
 	return e
 }
 
@@ -97,7 +99,7 @@ func TestToReferenceAddr(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if output, err := toReferenceAddr(test.input, opts); output != test.expected || err != nil {
+		if output, err := toReferenceAddr(test.input, &opts); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, output)
 		}
 	}
@@ -111,7 +113,7 @@ func TestToReferenceAddr(t *testing.T) {
 	}
 
 	for _, test := range errs {
-		if _, err := toReferenceAddr(test.input, opts); err.Error() != test.expected.Error() {
+		if _, err := toReferenceAddr(test.input, &opts); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
 		}
 	}
@@ -119,7 +121,7 @@ func TestToReferenceAddr(t *testing.T) {
 
 func TestValue(t *testing.T) {
 	opts := DefaultOptions()
-	parser := New(opts)
+	parser := New(&opts)
 
 	var tests = []struct {
 		input    any
@@ -141,7 +143,7 @@ func TestValue(t *testing.T) {
 
 func TestReference(t *testing.T) {
 	opts := DefaultOptions()
-	parser := New(opts)
+	parser := New(&opts)
 
 	var tests = []struct {
 		input    string
@@ -159,7 +161,7 @@ func TestReference(t *testing.T) {
 
 func TestCollection(t *testing.T) {
 	opts := DefaultOptions()
-	parser := New(opts)
+	parser := New(&opts)
 
 	var tests = []struct {
 		input    []any
@@ -183,24 +185,24 @@ func TestCollection(t *testing.T) {
 
 func TestComparison(t *testing.T) {
 	opts := DefaultOptions()
-	parser := New(opts)
+	parser := New(&opts)
 
 	var tests = []struct {
 		input    []any
 		expected Evaluable
 	}{
-		{[]any{opts.OperatorMapping[Eq], 1, 1}, expBinary(eq.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Ne], 1, 1}, expBinary(ne.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Gt], 1, 1}, expBinary(gt.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Ge], 1, 1}, expBinary(ge.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Lt], 1, 1}, expBinary(lt.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Le], 1, 1}, expBinary(le.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[In], 1, 1}, expBinary(in.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Nin], 1, 1}, expBinary(nin.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Nil], 1, 1}, expUnary(null.New, val(1))},
-		{[]any{opts.OperatorMapping[Present], 1, 1}, expUnary(present.New, val(1))},
-		{[]any{opts.OperatorMapping[Suffix], 1, 1}, expBinary(suffix.New, val(1), val(1))},
-		{[]any{opts.OperatorMapping[Prefix], 1, 1}, expBinary(prefix.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Eq], 1, 1}, expBinary("OP", eq.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Ne], 1, 1}, expBinary("OP", ne.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Gt], 1, 1}, expBinary("OP", gt.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Ge], 1, 1}, expBinary("OP", ge.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Lt], 1, 1}, expBinary("OP", lt.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Le], 1, 1}, expBinary("OP", le.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[In], 1, 1}, expBinary("OP", in.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Nin], 1, 1}, expBinary("OP", nin.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Nil], 1, 1}, expUnary("OP", null.New, val(1))},
+		{[]any{opts.OperatorMapping[Present], 1, 1}, expUnary("OP", present.New, val(1))},
+		{[]any{opts.OperatorMapping[Suffix], 1, 1}, expBinary("OP", suffix.New, val(1), val(1))},
+		{[]any{opts.OperatorMapping[Prefix], 1, 1}, expBinary("OP", prefix.New, val(1), val(1))},
 	}
 
 	for _, test := range tests {
@@ -212,17 +214,17 @@ func TestComparison(t *testing.T) {
 
 func TestLogical(t *testing.T) {
 	opts := DefaultOptions()
-	parser := New(opts)
+	parser := New(&opts)
 
 	var tests = []struct {
 		input    []any
 		expected Evaluable
 	}{
-		{[]any{opts.OperatorMapping[And], true, true}, expMany(and.New, val(true), val(true))},
-		{[]any{opts.OperatorMapping[Or], true, true}, expMany(or.New, val(true), val(true))},
-		{[]any{opts.OperatorMapping[Nor], true, true}, expMany(nor.New, val(true), val(true))},
-		{[]any{opts.OperatorMapping[Xor], true, true}, expMany(xor.New, val(true), val(true))},
-		{[]any{opts.OperatorMapping[Not], true, true}, expUnary(not.New, val(true))},
+		{[]any{opts.OperatorMapping[And], true, true}, expMany("OP", and.New, val(true), val(true))},
+		{[]any{opts.OperatorMapping[Or], true, true}, expMany("OP", or.New, val(true), val(true))},
+		{[]any{opts.OperatorMapping[Nor], true, true}, expMany("OP", nor.New, val(true), val(true))},
+		{[]any{opts.OperatorMapping[Xor], true, true}, expMany("OP", xor.New, val(true), val(true))},
+		{[]any{opts.OperatorMapping[Not], true, true}, expUnary("OP", not.New, val(true))},
 	}
 
 	for _, test := range tests {
@@ -234,7 +236,7 @@ func TestLogical(t *testing.T) {
 
 func TestInvalid(t *testing.T) {
 	opts := DefaultOptions()
-	parser := New(opts)
+	parser := New(&opts)
 
 	var tests = []struct {
 		input    []any

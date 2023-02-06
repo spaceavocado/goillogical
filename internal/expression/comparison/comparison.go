@@ -7,18 +7,14 @@ import (
 )
 
 type Number interface {
-	~int | ~float32 | ~float64
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64
 }
 
 type comparison struct {
-	kind     Kind
+	kind     string
 	operator string
 	operands []Evaluable
 	handler  func([]any) bool
-}
-
-func (c comparison) Kind() Kind {
-	return c.kind
 }
 
 func (c comparison) Evaluate(ctx Context) (any, error) {
@@ -31,6 +27,14 @@ func (c comparison) Evaluate(ctx Context) (any, error) {
 		evaluated[i] = val
 	}
 	return c.handler(evaluated), nil
+}
+
+func (c comparison) Serialize() any {
+	res := []any{c.kind}
+	for i := 1; i < len(c.operands); i++ {
+		res = append(res, c.operands[i].Serialize())
+	}
+	return res
 }
 
 func (c comparison) String() string {
@@ -53,6 +57,6 @@ func IsComparable(left any, right any) bool {
 	return true
 }
 
-func New(kind Kind, op string, operands []Evaluable, handler func([]any) bool) (Evaluable, error) {
-	return comparison{operator: op, operands: operands, handler: handler}, nil
+func New(kind string, op string, operands []Evaluable, handler func([]any) bool) (Evaluable, error) {
+	return comparison{kind: kind, operator: op, operands: operands, handler: handler}, nil
 }

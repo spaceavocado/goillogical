@@ -23,7 +23,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New(test.operands)
+		c, _ := New("OR", test.operands)
 		if output, err := c.Evaluate(map[string]any{}); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v/%v", test.operands, test.expected, output, err)
 		}
@@ -40,7 +40,7 @@ func TestHandler(t *testing.T) {
 
 	for _, test := range errs {
 
-		if _, err := New(test.operands); err.Error() != test.expected.Error() {
+		if _, err := New("OR", test.operands); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.operands, test.expected, err)
 		}
 	}

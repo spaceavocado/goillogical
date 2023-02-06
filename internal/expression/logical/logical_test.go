@@ -40,7 +40,7 @@ func TestString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New(Unknown, test.op, test.operands, func(ctx Context, evaluated []Evaluable) (bool, error) { return false, nil })
+		c, _ := New("Unknown", test.op, test.operands, func(ctx Context, evaluated []Evaluable) (bool, error) { return false, nil })
 		if output := c.String(); output != test.expected {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
 		}

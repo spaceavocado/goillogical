@@ -288,3 +288,41 @@ func TestEvaluate(t *testing.T) {
 		}
 	}
 }
+
+func TestSerialize(t *testing.T) {
+	opts := DefaultSerializeOptions()
+
+	tests := []struct {
+		input string
+		value any
+	}{
+		{"refA", "$refA"},
+		{"refA.(Number)", "$refA.(Number)"},
+	}
+
+	for _, test := range tests {
+		e, _ := New(test.input, &opts)
+		if value := e.Serialize(); value != test.value {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.value, value)
+		}
+	}
+}
+
+func TestString(t *testing.T) {
+	opts := DefaultSerializeOptions()
+
+	tests := []struct {
+		input string
+		value string
+	}{
+		{"refA", "{refA}"},
+		{"refA.(Number)", "{refA.(Number)}"},
+	}
+
+	for _, test := range tests {
+		e, _ := New(test.input, &opts)
+		if value := e.String(); value != test.value {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.value, value)
+		}
+	}
+}

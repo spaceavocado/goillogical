@@ -19,10 +19,10 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 	return true, nil
 }
 
-func New(operands []Evaluable) (Evaluable, error) {
+func New(operator string, operands []Evaluable) (Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical NOR expression must have at least 2 operands")
 	}
 
-	return l.New(Nor, "NOR", operands, handler)
+	return l.New(operator, "NOR", operands, handler)
 }

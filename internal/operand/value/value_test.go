@@ -37,6 +37,26 @@ func TestEvaluate(t *testing.T) {
 	}
 }
 
+func TestSerialize(t *testing.T) {
+	tests := []struct {
+		input any
+		value any
+	}{
+		{1, 1},
+		{1.1, 1.1},
+		{"val", "val"},
+		{true, true},
+		{false, false},
+	}
+
+	for _, test := range tests {
+		e, _ := New(test.input)
+		if value := e.Serialize(); value != test.value {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.value, value)
+		}
+	}
+}
+
 func TestString(t *testing.T) {
 	tests := []struct {
 		input    any

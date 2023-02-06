@@ -66,6 +66,6 @@ func New(opts ...Option) Goillogical {
 		opt(i)
 	}
 
-	i.parser = p.New(i.opts)
+	i.parser = p.New(&i.opts)
 	return i
 }

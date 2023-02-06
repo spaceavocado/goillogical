@@ -27,10 +27,10 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 	return out, nil
 }
 
-func New(operands []Evaluable) (Evaluable, error) {
+func New(operator string, operands []Evaluable) (Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical XOR expression must have at least 2 operands")
 	}
 
-	return l.New(Xor, "XOR", operands, handler)
+	return l.New(operator, "XOR", operands, handler)
 }

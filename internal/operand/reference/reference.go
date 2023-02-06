@@ -11,15 +11,15 @@ import (
 )
 
 type SerializeOptions struct {
-	From func(operand string) (string, error)
-	To   func(operand string) string
+	From func(string) (string, error)
+	To   func(string) string
 }
 
 func DefaultSerializeOptions() SerializeOptions {
 	return SerializeOptions{
-		From: func(operand string) (string, error) {
-			if len(operand) > 1 && strings.HasPrefix(operand, "$") {
-				return operand[1:], nil
+		From: func(path string) (string, error) {
+			if len(path) > 1 && strings.HasPrefix(path, "$") {
+				return path[1:], nil
 			}
 			return "", errors.New("invalid operand")
 		},
@@ -29,21 +29,22 @@ func DefaultSerializeOptions() SerializeOptions {
 	}
 }
 
-type DataType byte
+type DataType string
 
 const (
-	Undefined DataType = iota
-	Number
-	Integer
-	Float
-	String
-	Boolean
+	Undefined DataType = "Undefined"
+	Number             = "Number"
+	Integer            = "Integer"
+	Float              = "Float"
+	String             = "String"
+	Boolean            = "Boolean"
 )
 
 type reference struct {
 	addr string
 	path string
 	dt   DataType
+	opts *SerializeOptions
 }
 
 func (v reference) Kind() Kind {
@@ -57,6 +58,16 @@ func (r reference) String() string {
 func (r reference) Evaluate(ctx Context) (any, error) {
 	_, res, err := evaluate(ctx, r.path, r.dt)
 	return res, err
+}
+
+func (r reference) Serialize() any {
+	path := r.path
+
+	if r.dt != Undefined {
+		path = fmt.Sprintf("%s.(%s)", r.path, r.dt)
+	}
+
+	return r.opts.To(path)
 }
 
 func getDataType(path string) (DataType, error) {
@@ -243,11 +254,11 @@ func evaluate(ctx Context, path string, dt DataType) (string, any, error) {
 	}
 }
 
-func New(addr string) (Evaluable, error) {
+func New(addr string, opts *SerializeOptions) (Evaluable, error) {
 	dt, err := getDataType(addr)
 	if err != nil {
 		return nil, err
 	}
 
-	return reference{addr: addr, path: trimDataType(addr), dt: dt}, nil
+	return reference{addr: addr, path: trimDataType(addr), dt: dt, opts: opts}, nil
 }

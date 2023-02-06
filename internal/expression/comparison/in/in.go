@@ -34,6 +34,6 @@ func handler(evaluated []any) bool {
 	return false
 }
 
-func New(left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New(In, "<in>", []Evaluable{left, right}, handler)
+func New(operator string, left Evaluable, right Evaluable) (Evaluable, error) {
+	return c.New(operator, "<in>", []Evaluable{left, right}, handler)
 }

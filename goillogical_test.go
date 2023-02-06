@@ -16,17 +16,18 @@ func val(val any) Evaluable {
 }
 
 func ref(val string) Evaluable {
-	e, _ := reference.New(val)
+	opts := reference.DefaultSerializeOptions()
+	e, _ := reference.New(val, &opts)
 	return e
 }
 
-func expBinary(factory func(Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
-	e, _ := factory(left, right)
+func expBinary(op string, factory func(string, Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
+	e, _ := factory(op, left, right)
 	return e
 }
 
-func expMany(factory func([]Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
-	e, _ := factory(operands)
+func expMany(op string, factory func(string, []Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
+	e, _ := factory(op, operands)
 	return e
 }
 
@@ -84,9 +85,9 @@ func TestParse(t *testing.T) {
 		{true, val(true)},
 		{"val", val("val")},
 		{"$refA", ref("refA")},
-		{[]any{"==", 1, 1}, expBinary(eq.New, val(1), val(1))},
-		{[]any{"==", "$refA", "resolvedA"}, expBinary(eq.New, ref("refA"), val("resolvedA"))},
-		{[]any{"AND", []any{"==", 1, 1}, []any{"==", 2, 1}}, expMany(and.New, expBinary(eq.New, val(1), val(1)), expBinary(eq.New, val(2), val(1)))},
+		{[]any{"==", 1, 1}, expBinary("OP", eq.New, val(1), val(1))},
+		{[]any{"==", "$refA", "resolvedA"}, expBinary("OP", eq.New, ref("refA"), val("resolvedA"))},
+		{[]any{"AND", []any{"==", 1, 1}, []any{"==", 2, 1}}, expMany("OP", and.New, expBinary("OP", eq.New, val(1), val(1)), expBinary("OP", eq.New, val(2), val(1)))},
 	}
 
 	for _, test := range tests {
@@ -145,6 +146,41 @@ func TestStatement(t *testing.T) {
 	for _, test := range errs {
 		if _, err := illogical.Statement(test.input); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+}
+
+func TestWithOperatorMappingOptions(t *testing.T) {
+	illogical := New(WithOperatorMappingOptions(map[Kind]string{Eq: "IS"}))
+	ctx := map[string]any{
+		"refA": "resolvedA",
+	}
+
+	var tests1 = []struct {
+		input    any
+		expected any
+	}{
+		{[]any{"IS", 1, 1}, true},
+		{[]any{"IS", "$refA", "resolvedA"}, true},
+	}
+
+	for _, test := range tests1 {
+		if output, err := illogical.Evaluate(test.input, ctx); output != test.expected || err != nil {
+			t.Errorf("input (%v): expected %v, got %v/%v", test.input, test.expected, output, err)
+		}
+	}
+
+	var tests2 = []struct {
+		input    any
+		expected string
+	}{
+		{[]any{"IS", 1, 1}, "(1 == 1)"},
+		{[]any{"IS", "$refA", "resolvedA"}, "({refA} == \"resolvedA\")"},
+	}
+
+	for _, test := range tests2 {
+		if output, err := illogical.Statement(test.input); output != test.expected || err != nil {
+			t.Errorf("input (%v): expected %v, got %v/%v", test.input, test.expected, output, err)
 		}
 	}
 }
