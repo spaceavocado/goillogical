@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"fmt"
-	"reflect"
 	"regexp"
 )
 
@@ -199,50 +198,6 @@ func toBoolean(val any) (bool, error) {
 	}
 }
 
-func flattenContext(ctx Context) map[string]any {
-	res := make(map[string]any)
-	var lookup func(p any, path string)
-
-	joinPath := func(a string, b string) string {
-		if len(a) == 0 {
-			return b
-		}
-		return fmt.Sprintf("%s.%s", a, b)
-	}
-
-	lookup = func(val any, path string) {
-		v := reflect.ValueOf(val)
-		switch v.Kind() {
-		case reflect.Bool:
-			fallthrough
-		case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64:
-			fallthrough
-		case reflect.Uint, reflect.Uint8, reflect.Uint32, reflect.Uint64:
-			fallthrough
-		case reflect.Float32, reflect.Float64:
-			fallthrough
-		case reflect.String:
-			res[path] = val
-			break
-		case reflect.Map:
-			for prop, val := range val.(map[string]any) {
-				lookup(val, joinPath(path, prop))
-			}
-			break
-		case reflect.Slice:
-			for i := 0; i < v.Len(); i++ {
-				lookup(v.Index(i).Interface(), fmt.Sprintf("%s[%d]", path, i))
-			}
-			break
-		default:
-			return
-		}
-	}
-
-	lookup(ctx, "")
-	return res
-}
-
 func contextLookup(ctx Context, path string) (string, any) {
 	rxPath := regexp.MustCompile(`{([^{}]+)}`)
 	for match := rxPath.FindStringSubmatchIndex(path); len(match) > 0; {
@@ -261,23 +216,11 @@ func contextLookup(ctx Context, path string) (string, any) {
 	return path, nil
 }
 
-func isEvaluatedValue(value any) bool {
-	if value == nil {
-		return false
-	}
-	switch value.(type) {
-	case int, float32, float64, bool, string:
-		return true
-	default:
-		return false
-	}
-}
-
 func evaluate(ctx Context, path string, dt DataType) (string, any, error) {
-	resolvedPath, value := contextLookup(flattenContext(ctx), path)
+	resolvedPath, value := contextLookup(ctx, path)
 
-	if !isEvaluatedValue(value) {
-		return resolvedPath, nil, errors.New(fmt.Sprintf("invalid evaluated value at \"%s\" path", path))
+	if value == nil {
+		return resolvedPath, nil, nil
 	}
 
 	switch dt {

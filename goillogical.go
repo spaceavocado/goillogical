@@ -22,7 +22,7 @@ func (i illogical) Evaluate(exp any, ctx Context) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return e.Evaluate(ctx)
+	return e.Evaluate(FlattenContext(ctx))
 }
 
 func (i illogical) Parse(exp any) (Evaluable, error) {
