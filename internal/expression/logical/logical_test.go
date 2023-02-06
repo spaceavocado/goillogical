@@ -2,13 +2,14 @@ package logical
 
 import (
 	. "goillogical/internal"
+	. "goillogical/internal/mock"
 	"testing"
 )
 
 func TestEvaluate(t *testing.T) {
-	e1 := EvaluableMock(true, "e1")
-	e2 := EvaluableMock(false, "e2")
-	e3 := EvaluableMock("bogus", "e3")
+	e1 := E(true, "e1")
+	e2 := E(false, "e2")
+	e3 := E("bogus", "e3")
 
 	var tests = []struct {
 		evaluable Evaluable
@@ -26,9 +27,30 @@ func TestEvaluate(t *testing.T) {
 	}
 }
 
+func TestSerialize(t *testing.T) {
+	e1 := E("e1", "e1")
+	e2 := E("e2", "e2")
+
+	var tests = []struct {
+		op       string
+		operands []Evaluable
+		expected any
+	}{
+		{"->", []Evaluable{e1, e2}, []any{"->", "e1", "e2"}},
+		{"X", []Evaluable{e1}, []any{"X", "e1"}},
+	}
+
+	for _, test := range tests {
+		c, _ := New(test.op, test.op, test.operands, func(Context, []Evaluable) (bool, error) { return false, nil })
+		if output := c.Serialize(); Fprint(output) != Fprint(test.expected) {
+			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
+		}
+	}
+}
+
 func TestString(t *testing.T) {
-	e1 := EvaluableMock(true, "e1")
-	e2 := EvaluableMock(false, "e2")
+	e1 := E(true, "e1")
+	e2 := E(false, "e2")
 
 	var tests = []struct {
 		op       string

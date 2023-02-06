@@ -37,6 +37,10 @@ func (c comparison) Serialize() any {
 	return res
 }
 
+func (c comparison) Simplify(ctx Context) (any, Evaluable) {
+	return nil, nil
+}
+
 func (c comparison) String() string {
 	res := fmt.Sprintf("(%s %s", c.operands[0].String(), c.operator)
 	if len(c.operands) > 1 {

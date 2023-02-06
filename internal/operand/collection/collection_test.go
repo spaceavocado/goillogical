@@ -1,11 +1,12 @@
 package collection
 
 import (
-	"encoding/json"
 	. "goillogical/internal"
 	eq "goillogical/internal/expression/comparison/eq"
+	. "goillogical/internal/mock"
 	reference "goillogical/internal/operand/reference"
 	value "goillogical/internal/operand/value"
+	"regexp"
 	"testing"
 )
 
@@ -15,19 +16,24 @@ func val(val any) Evaluable {
 }
 
 func ref(val string) Evaluable {
-	opts := reference.DefaultSerializeOptions()
-	e, _ := reference.New(val, &opts)
+	serOpts := reference.DefaultSerializeOptions()
+	simOpts := reference.SimplifyOptions{
+		IgnoredPaths:   []string{"ignored"},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
+	e, _ := reference.New(val, &serOpts, &simOpts)
+	return e
+}
+
+func col(items ...Evaluable) Evaluable {
+	opts := DefaultSerializeOptions()
+	e, _ := New(items, &opts)
 	return e
 }
 
 func expBinary(factory func(string, Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
 	e, _ := factory("EXP", left, right)
 	return e
-}
-
-func toJson(input any) string {
-	res, _ := json.Marshal(true)
-	return string(res)
 }
 
 func TestEvaluate(t *testing.T) {
@@ -49,7 +55,7 @@ func TestEvaluate(t *testing.T) {
 
 	for _, test := range tests {
 		e, _ := New(test.input, &opts)
-		if output, err := e.Evaluate(ctx); toJson(output) != toJson(test.expected) || err != nil {
+		if output, err := e.Evaluate(ctx); Fprint(output) != Fprint(test.expected) || err != nil {
 			t.Errorf("input (%v): expected %v, got %v", test.input, output, err)
 		}
 	}
@@ -75,8 +81,32 @@ func TestSerialize(t *testing.T) {
 
 	for _, test := range tests {
 		e, _ := New(test.input, &opts)
-		if value := e.Serialize(); toJson(value) != toJson(test.expected) {
+		if value := e.Serialize(); Fprint(value) != Fprint(test.expected) {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, value)
+		}
+	}
+}
+
+func TestSimplify(t *testing.T) {
+	serOpts := DefaultSerializeOptions()
+
+	ctx := map[string]any{
+		"RefA": "A",
+	}
+	tests := []struct {
+		input []Evaluable
+		value any
+		e     any
+	}{
+		{[]Evaluable{ref("RefB")}, nil, col(ref("RefB"))},
+		{[]Evaluable{ref("RefA")}, []any{"A"}, nil},
+		{[]Evaluable{ref("RefA"), ref("RefB")}, nil, col(ref("RefA"), ref("RefB"))},
+	}
+
+	for _, test := range tests {
+		e, _ := New(test.input, &serOpts)
+		if value, self := e.Simplify(ctx); Fprint(value) != Fprint(test.value) || Fprint(self) != Fprint(test.e) {
+			t.Errorf("input (%v): expected %v/%v, got %v/%v", test.input, test.value, test.e, value, self)
 		}
 	}
 }

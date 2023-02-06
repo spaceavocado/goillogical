@@ -38,8 +38,9 @@ type OperatorMapping = map[Kind]string
 
 type Evaluable interface {
 	Evaluate(Context) (any, error)
-	String() string
 	Serialize() any
+	Simplify(Context) (any, Evaluable)
+	String() string
 }
 
 func IsEvaluatedPrimitive(value any) bool {

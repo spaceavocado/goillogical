@@ -15,6 +15,11 @@ type SerializeOptions struct {
 	To   func(string) string
 }
 
+type SimplifyOptions struct {
+	IgnoredPaths   []string
+	IgnoredPathsRx []regexp.Regexp
+}
+
 func DefaultSerializeOptions() SerializeOptions {
 	return SerializeOptions{
 		From: func(path string) (string, error) {
@@ -41,18 +46,11 @@ const (
 )
 
 type reference struct {
-	addr string
-	path string
-	dt   DataType
-	opts *SerializeOptions
-}
-
-func (v reference) Kind() Kind {
-	return Reference
-}
-
-func (r reference) String() string {
-	return fmt.Sprintf("{%s}", r.addr)
+	addr    string
+	path    string
+	dt      DataType
+	serOpts *SerializeOptions
+	simOpts *SimplifyOptions
 }
 
 func (r reference) Evaluate(ctx Context) (any, error) {
@@ -67,7 +65,19 @@ func (r reference) Serialize() any {
 		path = fmt.Sprintf("%s.(%s)", r.path, r.dt)
 	}
 
-	return r.opts.To(path)
+	return r.serOpts.To(path)
+}
+
+func (r reference) Simplify(ctx Context) (any, Evaluable) {
+	path, res, _ := evaluate(ctx, r.path, r.dt)
+	if res != nil || isIgnoredPath(path, r.simOpts) {
+		return res, nil
+	}
+	return nil, &r
+}
+
+func (r reference) String() string {
+	return fmt.Sprintf("{%s}", r.addr)
 }
 
 func getDataType(path string) (DataType, error) {
@@ -90,6 +100,22 @@ func getDataType(path string) (DataType, error) {
 		}
 	}
 	return Undefined, nil
+}
+
+func isIgnoredPath(path string, opts *SimplifyOptions) bool {
+	for _, p := range opts.IgnoredPaths {
+		if p == path {
+			return true
+		}
+	}
+
+	for _, r := range opts.IgnoredPathsRx {
+		if r.MatchString(path) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func trimDataType(path string) string {
@@ -254,11 +280,11 @@ func evaluate(ctx Context, path string, dt DataType) (string, any, error) {
 	}
 }
 
-func New(addr string, opts *SerializeOptions) (Evaluable, error) {
+func New(addr string, serOpts *SerializeOptions, simOpts *SimplifyOptions) (Evaluable, error) {
 	dt, err := getDataType(addr)
 	if err != nil {
 		return nil, err
 	}
 
-	return reference{addr: addr, path: trimDataType(addr), dt: dt, opts: opts}, nil
+	return reference{addr, trimDataType(addr), dt, serOpts, simOpts}, nil
 }

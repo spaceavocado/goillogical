@@ -4,8 +4,20 @@ import (
 	"errors"
 	"fmt"
 	. "goillogical/internal"
+	. "goillogical/internal/mock"
+	"regexp"
 	"testing"
 )
+
+func ref(val string) Evaluable {
+	serOpts := DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
+	e, _ := New(val, &serOpts, &simOpts)
+	return e
+}
 
 func TestGetDataType(t *testing.T) {
 	var tests = []struct {
@@ -289,8 +301,35 @@ func TestEvaluate(t *testing.T) {
 	}
 }
 
+func TestIsIgnoredPath(t *testing.T) {
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{"ignored"},
+		IgnoredPathsRx: []regexp.Regexp{*regexp.MustCompile("^refC")},
+	}
+
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"ignored", true},
+		{"not", false},
+		{"refC", true},
+		{"refC.(Number)", true},
+	}
+
+	for _, test := range tests {
+		if output := isIgnoredPath(test.input, &simOpts); output != test.expected {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, output)
+		}
+	}
+}
+
 func TestSerialize(t *testing.T) {
-	opts := DefaultSerializeOptions()
+	serOpts := DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
 
 	tests := []struct {
 		input string
@@ -301,15 +340,60 @@ func TestSerialize(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		e, _ := New(test.input, &opts)
+		e, _ := New(test.input, &serOpts, &simOpts)
 		if value := e.Serialize(); value != test.value {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.value, value)
 		}
 	}
 }
 
+func TestSimplify(t *testing.T) {
+	opts := DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{"ignored"},
+		IgnoredPathsRx: []regexp.Regexp{*regexp.MustCompile("^refC")},
+	}
+	ctx := FlattenContext(map[string]any{
+		"refA": 1,
+		"refB": map[string]any{
+			"refB1": 2,
+			"refB2": "refB1",
+			"refB3": true,
+		},
+		"refC": "refB1",
+		"refD": "refB2",
+		"refE": []any{1, []any{2, 3, 4}},
+		"refF": func() {},
+		"refG": "1",
+		"refH": "1.1",
+	})
+
+	tests := []struct {
+		input string
+		value any
+		e     any
+	}{
+		{"refJ", nil, ref("refJ")},
+		{"ignored", nil, nil},
+		{"refA", 1, nil},
+		{"refB.{refJ}", nil, ref("refB.{refJ}")},
+		{"refC.{refJ}", nil, nil},
+	}
+
+	for _, test := range tests {
+		e, _ := New(test.input, &opts, &simOpts)
+		if value, self := e.Simplify(ctx); value != test.value || Fprint(self) != Fprint(test.e) {
+			t.Errorf("input (%v): expected %v/%v, got %v/%v", test.input, test.value, test.e, value, self)
+		}
+	}
+}
+
 func TestString(t *testing.T) {
 	opts := DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
 
 	tests := []struct {
 		input string
@@ -320,7 +404,7 @@ func TestString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		e, _ := New(test.input, &opts)
+		e, _ := New(test.input, &opts, &simOpts)
 		if value := e.String(); value != test.value {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.value, value)
 		}

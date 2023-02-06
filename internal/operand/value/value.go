@@ -11,8 +11,16 @@ type value struct {
 	val any
 }
 
-func (v value) Kind() Kind {
-	return Value
+func (v value) Evaluate(ctx Context) (any, error) {
+	return v.val, nil
+}
+
+func (v value) Serialize() any {
+	return v.val
+}
+
+func (v value) Simplify(Context) (any, Evaluable) {
+	return v.val, nil
 }
 
 func (v value) String() string {
@@ -22,14 +30,6 @@ func (v value) String() string {
 	default:
 		return fmt.Sprintf("%v", v.val)
 	}
-}
-
-func (v value) Evaluate(ctx Context) (any, error) {
-	return v.val, nil
-}
-
-func (v value) Serialize() any {
-	return v.val
 }
 
 func isPrimitive(v any) bool {

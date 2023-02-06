@@ -52,6 +52,19 @@ func (c collection) Serialize() any {
 	return res
 }
 
+func (c collection) Simplify(ctx Context) (any, Evaluable) {
+	res := []any{}
+	for _, i := range c.items {
+		val, e := i.Simplify(ctx)
+		if e != nil {
+			return nil, &c
+		}
+		res = append(res, val)
+	}
+
+	return res, nil
+}
+
 func (c collection) String() string {
 	res := "["
 	for i, item := range c.items {

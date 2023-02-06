@@ -3,11 +3,12 @@ package lt
 import (
 	"fmt"
 	. "goillogical/internal"
+	. "goillogical/internal/mock"
 	"testing"
 )
 
 func e(val any) Evaluable {
-	return EvaluableMock(val, fmt.Sprintf("%v", val))
+	return E(val, fmt.Sprintf("%v", val))
 }
 
 func TestHandler(t *testing.T) {
