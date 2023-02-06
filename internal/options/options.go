@@ -1,4 +1,4 @@
-package goillogical
+package options
 
 import (
 	. "goillogical/internal"

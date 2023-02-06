@@ -3,7 +3,6 @@ package parser
 import (
 	"errors"
 	"fmt"
-	. "goillogical"
 	. "goillogical/internal"
 	eq "goillogical/internal/expression/comparison/eq"
 	ge "goillogical/internal/expression/comparison/ge"
@@ -26,6 +25,7 @@ import (
 	collection "goillogical/internal/operand/collection"
 	reference "goillogical/internal/operand/reference"
 	value "goillogical/internal/operand/value"
+	. "goillogical/internal/options"
 	"reflect"
 	"strings"
 )
