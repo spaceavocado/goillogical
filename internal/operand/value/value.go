@@ -20,7 +20,7 @@ func (v value) String() string {
 	case string:
 		return fmt.Sprintf("\"%s\"", v.val)
 	default:
-		return fmt.Sprintf("%s", v.val)
+		return fmt.Sprintf("%v", v.val)
 	}
 }
 

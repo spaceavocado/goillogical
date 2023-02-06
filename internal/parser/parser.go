@@ -165,6 +165,10 @@ func createExpression(expression []any, opts options) (Evaluable, error) {
 }
 
 func parse(input any, opts options) (Evaluable, error) {
+	if input == nil {
+		return nil, errors.New("unexpected input")
+	}
+
 	t := reflect.TypeOf(input).Kind()
 	if t != reflect.Slice {
 		return createOperand(input, opts)
