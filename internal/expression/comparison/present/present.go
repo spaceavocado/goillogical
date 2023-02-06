@@ -10,5 +10,5 @@ func handler(evaluated []any) bool {
 }
 
 func New(e Evaluable) (Evaluable, error) {
-	return c.New("<is present>", []Evaluable{e}, handler)
+	return c.New(Present, "<is present>", []Evaluable{e}, handler)
 }

@@ -24,5 +24,5 @@ func New(operands []Evaluable) (Evaluable, error) {
 		return nil, errors.New("logical AND expression must have at least 2 operands")
 	}
 
-	return l.New("AND", operands, handler)
+	return l.New(And, "AND", operands, handler)
 }

@@ -31,5 +31,5 @@ func handler(evaluated []any) bool {
 }
 
 func New(left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New("<overlaps>", []Evaluable{left, right}, handler)
+	return c.New(Overlap, "<overlaps>", []Evaluable{left, right}, handler)
 }

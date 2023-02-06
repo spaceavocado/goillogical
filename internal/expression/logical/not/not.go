@@ -20,5 +20,5 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 }
 
 func New(operand Evaluable) (Evaluable, error) {
-	return l.New("NOT", []Evaluable{operand}, handler)
+	return l.New(Not, "NOT", []Evaluable{operand}, handler)
 }

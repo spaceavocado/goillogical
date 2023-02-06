@@ -7,22 +7,9 @@ import (
 	"testing"
 )
 
-type mock struct {
-	val any
-}
-
-func (m mock) String() string {
-	return fmt.Sprintf("%v", m.val)
-}
-
-func (m mock) Evaluate(ctx Context) (any, error) {
-	return m.val, nil
-}
-
 func e(val any) Evaluable {
-	return mock{val}
+	return EvaluableMock(val, fmt.Sprintf("%v", val))
 }
-
 func TestHandler(t *testing.T) {
 	var tests = []struct {
 		operand  Evaluable

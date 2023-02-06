@@ -24,5 +24,5 @@ func New(operands []Evaluable) (Evaluable, error) {
 		return nil, errors.New("logical NOR expression must have at least 2 operands")
 	}
 
-	return l.New("NOR", operands, handler)
+	return l.New(Nor, "NOR", operands, handler)
 }

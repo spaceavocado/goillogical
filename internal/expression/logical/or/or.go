@@ -24,5 +24,5 @@ func New(operands []Evaluable) (Evaluable, error) {
 		return nil, errors.New("logical OR expression must have at least 2 operands")
 	}
 
-	return l.New("OR", operands, handler)
+	return l.New(Or, "OR", operands, handler)
 }

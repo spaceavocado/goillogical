@@ -33,5 +33,5 @@ func handler(evaluated []any) bool {
 }
 
 func New(left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New("<prefixes>", []Evaluable{left, right}, handler)
+	return c.New(Prefix, "<prefixes>", []Evaluable{left, right}, handler)
 }

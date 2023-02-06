@@ -10,5 +10,5 @@ func handler(evaluated []any) bool {
 }
 
 func New(e Evaluable) (Evaluable, error) {
-	return c.New("<is nil>", []Evaluable{e}, handler)
+	return c.New(Nil, "<is nil>", []Evaluable{e}, handler)
 }
