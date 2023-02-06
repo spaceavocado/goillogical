@@ -39,8 +39,11 @@ func (c collection) Evaluate(ctx Context) (any, error) {
 
 func (c collection) String() string {
 	res := "["
-	for _, i := range c.items {
-		res += i.String()
+	for i, item := range c.items {
+		res += item.String()
+		if i < len(c.items)-1 {
+			res += ", "
+		}
 	}
 	res += "]"
 	return res
