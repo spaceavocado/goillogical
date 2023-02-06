@@ -7,7 +7,6 @@ import (
 	and "goillogical/internal/expression/logical/and"
 	reference "goillogical/internal/operand/reference"
 	value "goillogical/internal/operand/value"
-	. "goillogical/internal/options"
 	"testing"
 )
 
@@ -32,8 +31,7 @@ func expMany(factory func([]Evaluable) (Evaluable, error), operands ...Evaluable
 }
 
 func TestEvaluate(t *testing.T) {
-	opts := DefaultOptions()
-	illogical := New(opts)
+	illogical := New()
 	ctx := map[string]any{
 		"refA": "resolvedA",
 	}
@@ -76,8 +74,7 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	opts := DefaultOptions()
-	illogical := New(opts)
+	illogical := New()
 
 	var tests = []struct {
 		input    any
@@ -115,8 +112,7 @@ func TestParse(t *testing.T) {
 }
 
 func TestStatement(t *testing.T) {
-	opts := DefaultOptions()
-	illogical := New(opts)
+	illogical := New()
 
 	var tests = []struct {
 		input    any
