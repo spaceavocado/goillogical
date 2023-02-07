@@ -5,19 +5,31 @@ import (
 	. "goillogical/internal"
 )
 
+type Handler func(Context, []Evaluable) (bool, error)
+type Simplify func(string, Context, []Evaluable) (any, Evaluable)
+
 type logical struct {
-	kind     Kind
+	kind     string
 	operator string
 	operands []Evaluable
-	handler  func(Context, []Evaluable) (bool, error)
-}
-
-func (l logical) Kind() Kind {
-	return l.kind
+	handler  Handler
+	simplify Simplify
 }
 
 func (l logical) Evaluate(ctx Context) (any, error) {
 	return l.handler(ctx, l.operands)
+}
+
+func (l logical) Serialize() any {
+	res := []any{l.kind}
+	for i := 1; i < len(l.operands); i++ {
+		res = append(res, l.operands[i].Serialize())
+	}
+	return res
+}
+
+func (l logical) Simplify(ctx Context) (any, Evaluable) {
+	return l.simplify(l.kind, ctx, l.operands)
 }
 
 func (l logical) String() string {
@@ -44,6 +56,6 @@ func Evaluate(ctx Context, o Evaluable) (bool, error) {
 	}
 }
 
-func New(kind Kind, op string, operands []Evaluable, handler func(Context, []Evaluable) (bool, error)) (Evaluable, error) {
-	return logical{kind: kind, operator: op, operands: operands, handler: handler}, nil
+func New(kind string, op string, operands []Evaluable, handler Handler, simplify Simplify) (Evaluable, error) {
+	return logical{kind, op, operands, handler, simplify}, nil
 }

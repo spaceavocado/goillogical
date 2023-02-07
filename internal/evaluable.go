@@ -37,8 +37,9 @@ const (
 type OperatorMapping = map[Kind]string
 
 type Evaluable interface {
-	Kind() Kind
 	Evaluate(Context) (any, error)
+	Serialize() any
+	Simplify(Context) (any, Evaluable)
 	String() string
 }
 

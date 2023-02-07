@@ -2,6 +2,7 @@ package collection
 
 import (
 	"errors"
+	"fmt"
 	. "goillogical/internal"
 )
 
@@ -19,6 +20,7 @@ func DefaultSerializeOptions() SerializeOptions {
 
 type collection struct {
 	items []Evaluable
+	opts  *SerializeOptions
 }
 
 func (c collection) Kind() Kind {
@@ -37,6 +39,32 @@ func (c collection) Evaluate(ctx Context) (any, error) {
 	return res, nil
 }
 
+func (c collection) Serialize() any {
+	head := c.items[0].Serialize()
+	if shouldBeEscaped(head, c.opts) {
+		head = escapeOperator(head.(string), c.opts)
+	}
+	res := []any{head}
+	for i := 1; i < len(c.items); i++ {
+		res = append(res, c.items[i].Serialize())
+	}
+
+	return res
+}
+
+func (c collection) Simplify(ctx Context) (any, Evaluable) {
+	res := []any{}
+	for _, i := range c.items {
+		val, e := i.Simplify(ctx)
+		if e != nil {
+			return nil, &c
+		}
+		res = append(res, val)
+	}
+
+	return res, nil
+}
+
 func (c collection) String() string {
 	res := "["
 	for i, item := range c.items {
@@ -49,7 +77,25 @@ func (c collection) String() string {
 	return res
 }
 
-func New(items []Evaluable) (Evaluable, error) {
+func shouldBeEscaped(input any, opts *SerializeOptions) bool {
+	if input == nil {
+		return false
+	}
+
+	switch input.(type) {
+	case string:
+		_, ok := opts.EscapedOperators[input.(string)]
+		return ok
+	default:
+		return false
+	}
+}
+
+func escapeOperator(input string, opts *SerializeOptions) string {
+	return fmt.Sprintf("%s%s", opts.EscapeCharacter, input)
+}
+
+func New(items []Evaluable, opts *SerializeOptions) (Evaluable, error) {
 	if len(items) == 0 {
 		return nil, errors.New("collection operand must have at least 1 item")
 	}
@@ -60,5 +106,5 @@ func New(items []Evaluable) (Evaluable, error) {
 	// 	}
 	// }
 
-	return collection{items}, nil
+	return collection{items, opts}, nil
 }

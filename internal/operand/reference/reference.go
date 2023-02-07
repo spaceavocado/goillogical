@@ -11,15 +11,20 @@ import (
 )
 
 type SerializeOptions struct {
-	From func(operand string) (string, error)
-	To   func(operand string) string
+	From func(string) (string, error)
+	To   func(string) string
+}
+
+type SimplifyOptions struct {
+	IgnoredPaths   []string
+	IgnoredPathsRx []regexp.Regexp
 }
 
 func DefaultSerializeOptions() SerializeOptions {
 	return SerializeOptions{
-		From: func(operand string) (string, error) {
-			if len(operand) > 1 && strings.HasPrefix(operand, "$") {
-				return operand[1:], nil
+		From: func(path string) (string, error) {
+			if len(path) > 1 && strings.HasPrefix(path, "$") {
+				return path[1:], nil
 			}
 			return "", errors.New("invalid operand")
 		},
@@ -29,34 +34,50 @@ func DefaultSerializeOptions() SerializeOptions {
 	}
 }
 
-type DataType byte
+type DataType string
 
 const (
-	Undefined DataType = iota
-	Number
-	Integer
-	Float
-	String
-	Boolean
+	Undefined DataType = "Undefined"
+	Number             = "Number"
+	Integer            = "Integer"
+	Float              = "Float"
+	String             = "String"
+	Boolean            = "Boolean"
 )
 
 type reference struct {
-	addr string
-	path string
-	dt   DataType
-}
-
-func (v reference) Kind() Kind {
-	return Reference
-}
-
-func (r reference) String() string {
-	return fmt.Sprintf("{%s}", r.addr)
+	addr    string
+	path    string
+	dt      DataType
+	serOpts *SerializeOptions
+	simOpts *SimplifyOptions
 }
 
 func (r reference) Evaluate(ctx Context) (any, error) {
 	_, res, err := evaluate(ctx, r.path, r.dt)
 	return res, err
+}
+
+func (r reference) Serialize() any {
+	path := r.path
+
+	if r.dt != Undefined {
+		path = fmt.Sprintf("%s.(%s)", r.path, r.dt)
+	}
+
+	return r.serOpts.To(path)
+}
+
+func (r reference) Simplify(ctx Context) (any, Evaluable) {
+	path, res, _ := evaluate(ctx, r.path, r.dt)
+	if res != nil || isIgnoredPath(path, r.simOpts) {
+		return res, nil
+	}
+	return nil, &r
+}
+
+func (r reference) String() string {
+	return fmt.Sprintf("{%s}", r.addr)
 }
 
 func getDataType(path string) (DataType, error) {
@@ -79,6 +100,22 @@ func getDataType(path string) (DataType, error) {
 		}
 	}
 	return Undefined, nil
+}
+
+func isIgnoredPath(path string, opts *SimplifyOptions) bool {
+	for _, p := range opts.IgnoredPaths {
+		if p == path {
+			return true
+		}
+	}
+
+	for _, r := range opts.IgnoredPathsRx {
+		if r.MatchString(path) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func trimDataType(path string) string {
@@ -243,11 +280,11 @@ func evaluate(ctx Context, path string, dt DataType) (string, any, error) {
 	}
 }
 
-func New(addr string) (Evaluable, error) {
+func New(addr string, serOpts *SerializeOptions, simOpts *SimplifyOptions) (Evaluable, error) {
 	dt, err := getDataType(addr)
 	if err != nil {
 		return nil, err
 	}
 
-	return reference{addr: addr, path: trimDataType(addr), dt: dt}, nil
+	return reference{addr, trimDataType(addr), dt, serOpts, simOpts}, nil
 }

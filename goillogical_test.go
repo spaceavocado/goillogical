@@ -5,35 +5,12 @@ import (
 	. "goillogical/internal"
 	eq "goillogical/internal/expression/comparison/eq"
 	and "goillogical/internal/expression/logical/and"
-	reference "goillogical/internal/operand/reference"
-	value "goillogical/internal/operand/value"
-	. "goillogical/internal/options"
+	. "goillogical/internal/mock"
 	"testing"
 )
 
-func val(val any) Evaluable {
-	e, _ := value.New(val)
-	return e
-}
-
-func ref(val string) Evaluable {
-	e, _ := reference.New(val)
-	return e
-}
-
-func expBinary(factory func(Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
-	e, _ := factory(left, right)
-	return e
-}
-
-func expMany(factory func([]Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
-	e, _ := factory(operands)
-	return e
-}
-
 func TestEvaluate(t *testing.T) {
-	opts := DefaultOptions()
-	illogical := New(opts)
+	illogical := New()
 	ctx := map[string]any{
 		"refA": "resolvedA",
 	}
@@ -76,20 +53,19 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	opts := DefaultOptions()
-	illogical := New(opts)
+	illogical := New()
 
 	var tests = []struct {
 		input    any
 		expected Evaluable
 	}{
-		{1, val(1)},
-		{true, val(true)},
-		{"val", val("val")},
-		{"$refA", ref("refA")},
-		{[]any{"==", 1, 1}, expBinary(eq.New, val(1), val(1))},
-		{[]any{"==", "$refA", "resolvedA"}, expBinary(eq.New, ref("refA"), val("resolvedA"))},
-		{[]any{"AND", []any{"==", 1, 1}, []any{"==", 2, 1}}, expMany(and.New, expBinary(eq.New, val(1), val(1)), expBinary(eq.New, val(2), val(1)))},
+		{1, Val(1)},
+		{true, Val(true)},
+		{"val", Val("val")},
+		{"$refA", Ref("refA")},
+		{[]any{"==", 1, 1}, ExpBinary("OP", eq.New, Val(1), Val(1))},
+		{[]any{"==", "$refA", "resolvedA"}, ExpBinary("OP", eq.New, Ref("refA"), Val("resolvedA"))},
+		{[]any{"AND", []any{"==", 1, 1}, []any{"==", 2, 1}}, ExpMany("OP", and.New, ExpBinary("OP", eq.New, Val(1), Val(1)), ExpBinary("OP", eq.New, Val(2), Val(1)))},
 	}
 
 	for _, test := range tests {
@@ -115,8 +91,7 @@ func TestParse(t *testing.T) {
 }
 
 func TestStatement(t *testing.T) {
-	opts := DefaultOptions()
-	illogical := New(opts)
+	illogical := New()
 
 	var tests = []struct {
 		input    any
@@ -149,6 +124,41 @@ func TestStatement(t *testing.T) {
 	for _, test := range errs {
 		if _, err := illogical.Statement(test.input); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+}
+
+func TestWithOperatorMappingOptions(t *testing.T) {
+	illogical := New(WithOperatorMappingOptions(map[Kind]string{Eq: "IS"}))
+	ctx := map[string]any{
+		"refA": "resolvedA",
+	}
+
+	var tests1 = []struct {
+		input    any
+		expected any
+	}{
+		{[]any{"IS", 1, 1}, true},
+		{[]any{"IS", "$refA", "resolvedA"}, true},
+	}
+
+	for _, test := range tests1 {
+		if output, err := illogical.Evaluate(test.input, ctx); output != test.expected || err != nil {
+			t.Errorf("input (%v): expected %v, got %v/%v", test.input, test.expected, output, err)
+		}
+	}
+
+	var tests2 = []struct {
+		input    any
+		expected string
+	}{
+		{[]any{"IS", 1, 1}, "(1 == 1)"},
+		{[]any{"IS", "$refA", "resolvedA"}, "({refA} == \"resolvedA\")"},
+	}
+
+	for _, test := range tests2 {
+		if output, err := illogical.Statement(test.input); output != test.expected || err != nil {
+			t.Errorf("input (%v): expected %v, got %v/%v", test.input, test.expected, output, err)
 		}
 	}
 }

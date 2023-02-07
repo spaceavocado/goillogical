@@ -2,21 +2,19 @@ package logical
 
 import (
 	. "goillogical/internal"
+	. "goillogical/internal/mock"
+	. "goillogical/internal/test"
 	"testing"
 )
 
 func TestEvaluate(t *testing.T) {
-	e1 := EvaluableMock(true, "e1")
-	e2 := EvaluableMock(false, "e2")
-	e3 := EvaluableMock("bogus", "e3")
-
 	var tests = []struct {
 		evaluable Evaluable
 		expected  bool
 	}{
-		{e1, true},
-		{e2, false},
-		{e3, false},
+		{Val(true), true},
+		{Val(false), false},
+		{Val("val"), false},
 	}
 
 	for _, test := range tests {
@@ -26,21 +24,36 @@ func TestEvaluate(t *testing.T) {
 	}
 }
 
-func TestString(t *testing.T) {
-	e1 := EvaluableMock(true, "e1")
-	e2 := EvaluableMock(false, "e2")
+func TestSerialize(t *testing.T) {
+	var tests = []struct {
+		op       string
+		operands []Evaluable
+		expected any
+	}{
+		{"->", []Evaluable{Val("e1"), Val("e2")}, []any{"->", "e1", "e2"}},
+		{"X", []Evaluable{Val("e1")}, []any{"X", "e1"}},
+	}
 
+	for _, test := range tests {
+		c, _ := New(test.op, test.op, test.operands, func(Context, []Evaluable) (bool, error) { return false, nil }, func(string, Context, []Evaluable) (any, Evaluable) { return nil, nil })
+		if output := c.Serialize(); Fprint(output) != Fprint(test.expected) {
+			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
+		}
+	}
+}
+
+func TestString(t *testing.T) {
 	var tests = []struct {
 		op       string
 		operands []Evaluable
 		expected string
 	}{
-		{"AND", []Evaluable{e1, e2}, "(e1 AND e2)"},
-		{"AND", []Evaluable{e1, e2, e1}, "(e1 AND e2 AND e1)"},
+		{"AND", []Evaluable{Val("e1"), Val("e2")}, "(\"e1\" AND \"e2\")"},
+		{"AND", []Evaluable{Val("e1"), Val("e2"), Val("e1")}, "(\"e1\" AND \"e2\" AND \"e1\")"},
 	}
 
 	for _, test := range tests {
-		c, _ := New(Unknown, test.op, test.operands, func(ctx Context, evaluated []Evaluable) (bool, error) { return false, nil })
+		c, _ := New("Unknown", test.op, test.operands, func(ctx Context, evaluated []Evaluable) (bool, error) { return false, nil }, func(string, Context, []Evaluable) (any, Evaluable) { return nil, nil })
 		if output := c.String(); output != test.expected {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
 		}

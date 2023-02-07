@@ -31,51 +31,56 @@ import (
 )
 
 type options struct {
-	OperatorHandlers          map[string]func([]Evaluable) (Evaluable, error)
-	EscapeCharacter           string
-	ReferenceSerializeOptions reference.SerializeOptions
-}
-
-func expressionUnary(factory func(Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
-	return func(operands []Evaluable) (Evaluable, error) {
-		return factory(operands[0])
+	OperatorHandlers map[string]func([]Evaluable) (Evaluable, error)
+	Serialize        struct {
+		Reference  reference.SerializeOptions
+		Collection collection.SerializeOptions
+	}
+	Simplify struct {
+		Reference reference.SimplifyOptions
 	}
 }
 
-func expressionBinary(factory func(Evaluable, Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
+func expressionUnary(op string, factory func(string, Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
 	return func(operands []Evaluable) (Evaluable, error) {
-		return factory(operands[0], operands[1])
+		return factory(op, operands[0])
 	}
 }
 
-func expressionMany(factory func([]Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
+func expressionBinary(op string, factory func(string, Evaluable, Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
 	return func(operands []Evaluable) (Evaluable, error) {
-		return factory(operands)
+		return factory(op, operands[0], operands[1])
+	}
+}
+
+func expressionMany(op string, factory func(string, []Evaluable, string, string) (Evaluable, error), notOp string, norOp string) func([]Evaluable) (Evaluable, error) {
+	return func(operands []Evaluable) (Evaluable, error) {
+		return factory(op, operands, notOp, norOp)
 	}
 }
 
 func operatorHandlers(opts OperatorMapping) map[string]func([]Evaluable) (Evaluable, error) {
 	return map[string]func([]Evaluable) (Evaluable, error){
 		// Logical
-		opts[And]: expressionMany(and.New),
-		opts[Or]:  expressionMany(or.New),
-		opts[Nor]: expressionMany(nor.New),
-		opts[Xor]: expressionMany(xor.New),
-		opts[Not]: expressionUnary(not.New),
+		opts[And]: expressionMany(opts[And], and.New, opts[Not], opts[Nor]),
+		opts[Or]:  expressionMany(opts[Or], or.New, opts[Not], opts[Nor]),
+		opts[Nor]: expressionMany(opts[Nor], nor.New, opts[Not], opts[Nor]),
+		opts[Xor]: expressionMany(opts[Xor], xor.New, opts[Not], opts[Nor]),
+		opts[Not]: expressionUnary(opts[Not], not.New),
 		// Comparison
-		opts[Eq]:      expressionBinary(eq.New),
-		opts[Ne]:      expressionBinary(ne.New),
-		opts[Gt]:      expressionBinary(gt.New),
-		opts[Ge]:      expressionBinary(ge.New),
-		opts[Lt]:      expressionBinary(lt.New),
-		opts[Le]:      expressionBinary(le.New),
-		opts[In]:      expressionBinary(in.New),
-		opts[Nin]:     expressionBinary(nin.New),
-		opts[Overlap]: expressionBinary(overlap.New),
-		opts[Nil]:     expressionUnary(null.New),
-		opts[Present]: expressionUnary(present.New),
-		opts[Suffix]:  expressionBinary(suffix.New),
-		opts[Prefix]:  expressionBinary(prefix.New),
+		opts[Eq]:      expressionBinary(opts[Eq], eq.New),
+		opts[Ne]:      expressionBinary(opts[Ne], ne.New),
+		opts[Gt]:      expressionBinary(opts[Gt], gt.New),
+		opts[Ge]:      expressionBinary(opts[Ge], ge.New),
+		opts[Lt]:      expressionBinary(opts[Lt], lt.New),
+		opts[Le]:      expressionBinary(opts[Le], le.New),
+		opts[In]:      expressionBinary(opts[In], in.New),
+		opts[Nin]:     expressionBinary(opts[Nin], nin.New),
+		opts[Overlap]: expressionBinary(opts[Overlap], overlap.New),
+		opts[Nil]:     expressionUnary(opts[Nil], null.New),
+		opts[Present]: expressionUnary(opts[Present], present.New),
+		opts[Suffix]:  expressionBinary(opts[Suffix], suffix.New),
+		opts[Prefix]:  expressionBinary(opts[Prefix], prefix.New),
 	}
 }
 
@@ -88,14 +93,14 @@ type parser struct {
 }
 
 func (p parser) Parse(exp any) (Evaluable, error) {
-	return parse(exp, p.opts)
+	return parse(exp, &p.opts)
 }
 
 func isEscaped(value string, escapeCharacter string) bool {
 	return escapeCharacter != "" && strings.HasPrefix(value, escapeCharacter)
 }
 
-func toReferenceAddr(input any, opts reference.SerializeOptions) (string, error) {
+func toReferenceAddr(input any, opts *reference.SerializeOptions) (string, error) {
 	switch input.(type) {
 	case string:
 		return opts.From(input.(string))
@@ -104,7 +109,7 @@ func toReferenceAddr(input any, opts reference.SerializeOptions) (string, error)
 	}
 }
 
-func createOperand(input any, opts options) (Evaluable, error) {
+func createOperand(input any, opts *options) (Evaluable, error) {
 	if input == nil {
 		return nil, errors.New("invalid undefined operand")
 	}
@@ -124,12 +129,12 @@ func createOperand(input any, opts options) (Evaluable, error) {
 			}
 			operands[i] = e
 		}
-		return collection.New(operands)
+		return collection.New(operands, &opts.Serialize.Collection)
 	}
 
-	addr, err := toReferenceAddr(input, opts.ReferenceSerializeOptions)
+	addr, err := toReferenceAddr(input, &opts.Serialize.Reference)
 	if err == nil {
-		return reference.New(addr)
+		return reference.New(addr, &opts.Serialize.Reference, &opts.Simplify.Reference)
 	}
 
 	if !IsEvaluatedPrimitive(input) {
@@ -139,7 +144,7 @@ func createOperand(input any, opts options) (Evaluable, error) {
 	return value.New(input)
 }
 
-func createExpression(expression []any, opts options) (Evaluable, error) {
+func createExpression(expression []any, opts *options) (Evaluable, error) {
 	operator := expression[0]
 	operands := expression[1:]
 	switch operator.(type) {
@@ -164,7 +169,7 @@ func createExpression(expression []any, opts options) (Evaluable, error) {
 	}
 }
 
-func parse(input any, opts options) (Evaluable, error) {
+func parse(input any, opts *options) (Evaluable, error) {
 	if input == nil {
 		return nil, errors.New("unexpected input")
 	}
@@ -181,7 +186,7 @@ func parse(input any, opts options) (Evaluable, error) {
 	}
 
 	operator := v.Index(0).Interface()
-	if isEscaped(fmt.Sprintf("%v", operator), opts.EscapeCharacter) {
+	if isEscaped(fmt.Sprintf("%v", operator), opts.Serialize.Collection.EscapeCharacter) {
 		return createOperand(append([]any{operator.(string)[1:]}, v.Slice(1, v.Len()).Interface().([]any)...), opts)
 	}
 
@@ -193,10 +198,10 @@ func parse(input any, opts options) (Evaluable, error) {
 	return e, nil
 }
 
-func New(opts Options) Parser {
+func New(opts *Options) Parser {
 	return &parser{opts: options{
-		OperatorHandlers:          operatorHandlers(opts.OperatorMapping),
-		ReferenceSerializeOptions: opts.Serialize.Reference,
-		EscapeCharacter:           opts.Serialize.Collection.EscapeCharacter,
+		OperatorHandlers: operatorHandlers(opts.OperatorMapping),
+		Serialize:        opts.Serialize,
+		Simplify:         opts.Simplify,
 	}}
 }

@@ -12,6 +12,6 @@ func handler(evaluated []any) bool {
 	return evaluated[0] == evaluated[1]
 }
 
-func New(left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New(Eq, "==", []Evaluable{left, right}, handler)
+func New(operator string, left Evaluable, right Evaluable) (Evaluable, error) {
+	return c.New(operator, "==", []Evaluable{left, right}, handler)
 }

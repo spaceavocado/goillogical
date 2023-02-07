@@ -1,14 +1,10 @@
 package present
 
 import (
-	"fmt"
 	. "goillogical/internal"
+	. "goillogical/internal/mock"
 	"testing"
 )
-
-func e(val any) Evaluable {
-	return EvaluableMock(val, fmt.Sprintf("%v", val))
-}
 
 func TestHandler(t *testing.T) {
 	var tests = []struct {
@@ -16,18 +12,17 @@ func TestHandler(t *testing.T) {
 		expected bool
 	}{
 		// Truthy
-		{e(1), true},
-		{e(1.1), true},
-		{e("1"), true},
-		{e(true), true},
-		{e(false), true},
-		{e([]int{1}), true},
+		{Val(1), true},
+		{Val(1.1), true},
+		{Val("1"), true},
+		{Val(true), true},
+		{Val(false), true},
 		// Falsy
-		{e(nil), false},
+		{Ref("Missing"), false},
 	}
 
 	for _, test := range tests {
-		c, _ := New(test.eval)
+		c, _ := New("PRESENT", test.eval)
 		if output, err := c.Evaluate(map[string]any{}); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v/%v", test.eval.String(), test.expected, output, err)
 		}

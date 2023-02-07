@@ -4,12 +4,16 @@ import (
 	. "goillogical/internal"
 	c "goillogical/internal/operand/collection"
 	r "goillogical/internal/operand/reference"
+	"regexp"
 )
 
 type Options struct {
 	Serialize struct {
 		Reference  r.SerializeOptions
 		Collection c.SerializeOptions
+	}
+	Simplify struct {
+		Reference r.SimplifyOptions
 	}
 	OperatorMapping OperatorMapping
 }
@@ -45,6 +49,14 @@ func DefaultOptions() Options {
 		}{
 			Reference:  r.DefaultSerializeOptions(),
 			Collection: c.DefaultSerializeOptions(),
+		},
+		Simplify: struct {
+			Reference r.SimplifyOptions
+		}{
+			Reference: r.SimplifyOptions{
+				IgnoredPaths:   []string{},
+				IgnoredPathsRx: []regexp.Regexp{},
+			},
 		},
 		OperatorMapping: DefaultOperatorMapping(),
 	}

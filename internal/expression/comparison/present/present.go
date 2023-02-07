@@ -9,6 +9,6 @@ func handler(evaluated []any) bool {
 	return evaluated[0] != nil
 }
 
-func New(e Evaluable) (Evaluable, error) {
-	return c.New(Present, "<is present>", []Evaluable{e}, handler)
+func New(operator string, e Evaluable) (Evaluable, error) {
+	return c.New(operator, "<is present>", []Evaluable{e}, handler)
 }
