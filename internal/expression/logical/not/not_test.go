@@ -58,7 +58,7 @@ func TestSimplify(t *testing.T) {
 		{Val(true), false, nil},
 		{Val(false), true, nil},
 		{Ref("RefA"), false, nil},
-		{Ref("Missing"), false, exp(Ref("Missing"))},
+		{Ref("Missing"), nil, exp(Ref("Missing"))},
 	}
 
 	for _, test := range tests {

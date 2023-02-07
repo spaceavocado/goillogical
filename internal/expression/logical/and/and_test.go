@@ -64,7 +64,7 @@ func TestSimplify(t *testing.T) {
 	}{
 		{[]Evaluable{Val(true), Val(true)}, true, nil},
 		{[]Evaluable{Val(true), Val(false)}, false, nil},
-		{[]Evaluable{Ref("RefA"), Val(true)}, false, nil},
+		{[]Evaluable{Ref("RefA"), Val(true)}, true, nil},
 		{[]Evaluable{Ref("Missing"), Val(true)}, nil, Ref("Missing")},
 		{[]Evaluable{Ref("Missing"), Ref("Missing")}, nil, exp(Ref("Missing"), Ref("Missing"))},
 	}
