@@ -1,15 +1,10 @@
 package nin
 
 import (
-	"fmt"
 	. "goillogical/internal"
 	. "goillogical/internal/mock"
 	"testing"
 )
-
-func e(val any) Evaluable {
-	return E(val, fmt.Sprintf("%v", val))
-}
 
 func TestHandler(t *testing.T) {
 	var tests = []struct {
@@ -18,17 +13,17 @@ func TestHandler(t *testing.T) {
 		expected bool
 	}{
 		// Truthy
-		{e(0), e([]any{1}), true},
-		{e([]any{1}), e(0), true},
-		{e("0"), e([]any{"1"}), true},
-		{e(false), e([]any{true}), true},
-		{e(1.0), e([]any{1.1}), true},
-		{e(1), e(1), true},
-		{e([]any{1}), e([]any{1}), true},
-		{e(1), e([]any{"1"}), true},
+		{Val(0), Col(Val(1)), true},
+		{Col(Val(1)), Val(0), true},
+		{Val("0"), Col(Val("1")), true},
+		{Val(false), Col(Val(true)), true},
+		{Val(1.0), Col(Val(1.1)), true},
+		{Val(1), Val(1), true},
+		{Col(Val(1)), Col(Val(1)), true},
+		{Val(1), Col(Val("1")), true},
 		// Falsy
-		{e(1), e([]any{1}), false},
-		{e([]any{1}), e(1), false},
+		{Val(1), Col(Val(1)), false},
+		{Col(Val(1)), Val(1), false},
 	}
 
 	for _, test := range tests {

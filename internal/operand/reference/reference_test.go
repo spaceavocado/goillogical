@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	. "goillogical/internal"
-	. "goillogical/internal/mock"
+	. "goillogical/internal/test"
 	"regexp"
 	"testing"
 )

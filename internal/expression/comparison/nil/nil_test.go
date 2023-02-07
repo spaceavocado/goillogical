@@ -1,29 +1,24 @@
 package nil
 
 import (
-	"fmt"
 	. "goillogical/internal"
 	. "goillogical/internal/mock"
 	"testing"
 )
 
-func e(val any) Evaluable {
-	return E(val, fmt.Sprintf("%v", val))
-}
 func TestHandler(t *testing.T) {
 	var tests = []struct {
 		eval     Evaluable
 		expected bool
 	}{
 		// Truthy
-		{e(nil), true},
+		{Ref("Missing"), true},
 		// Falsy
-		{e(1), false},
-		{e(1.1), false},
-		{e("1"), false},
-		{e(true), false},
-		{e(false), false},
-		{e([]int{1}), false},
+		{Val(1), false},
+		{Val(1.1), false},
+		{Val("1"), false},
+		{Val(true), false},
+		{Val(false), false},
 	}
 
 	for _, test := range tests {

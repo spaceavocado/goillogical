@@ -2,21 +2,19 @@ package not
 
 import (
 	"errors"
-	"fmt"
 	. "goillogical/internal"
+	. "goillogical/internal/mock"
+	. "goillogical/internal/test"
 	"testing"
 )
 
-func e(val any) Evaluable {
-	return E(val, fmt.Sprintf("%v", val))
-}
 func TestHandler(t *testing.T) {
 	var tests = []struct {
 		operand  Evaluable
 		expected bool
 	}{
-		{e(true), false},
-		{e(false), true},
+		{Val(true), false},
+		{Val(false), true},
 	}
 
 	for _, test := range tests {
@@ -30,13 +28,41 @@ func TestHandler(t *testing.T) {
 		operand  Evaluable
 		expected error
 	}{
-		{e("bogus"), errors.New("logical NOT expression's operand must be evaluated to boolean value")},
+		{Val("bogus"), errors.New("logical NOT expression's operand must be evaluated to boolean value")},
 	}
 
 	for _, test := range errs {
 		c, _ := New("NOT", test.operand)
 		if _, err := c.Evaluate(map[string]any{}); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.operand, test.expected, err)
+		}
+	}
+}
+
+func TestSimplify(t *testing.T) {
+	ctx := map[string]any{
+		"RefA": true,
+	}
+
+	exp := func(operand Evaluable) Evaluable {
+		e, _ := New("NOT", operand)
+		return e
+	}
+
+	var tests = []struct {
+		input Evaluable
+		value any
+		e     any
+	}{
+		{Val(true), false, nil},
+		{Val(false), true, nil},
+		{Ref("RefA"), false, nil},
+		{Ref("Missing"), false, exp(Ref("Missing"))},
+	}
+
+	for _, test := range tests {
+		if value, self := exp(test.input).Simplify(ctx); Fprint(value) != Fprint(test.value) || Fprint(self) != Fprint(test.e) {
+			t.Errorf("input (%v): expected %v/%v, got %v/%v", test.input, test.value, test.e, value, self)
 		}
 	}
 }

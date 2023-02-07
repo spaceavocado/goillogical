@@ -19,6 +19,20 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 	}
 }
 
+func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluable) {
+	res, e := operands[0].Simplify(ctx)
+	if b, ok := res.(bool); ok {
+		return !b, nil
+	}
+
+	if e != nil {
+		e, _ := New(operator, e)
+		return nil, e
+	}
+
+	return nil, nil
+}
+
 func New(operator string, operand Evaluable) (Evaluable, error) {
-	return l.New(operator, "NOT", []Evaluable{operand}, handler)
+	return l.New(operator, "NOT", []Evaluable{operand}, handler, simplify)
 }

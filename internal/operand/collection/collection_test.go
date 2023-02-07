@@ -3,9 +3,9 @@ package collection
 import (
 	. "goillogical/internal"
 	eq "goillogical/internal/expression/comparison/eq"
-	. "goillogical/internal/mock"
 	reference "goillogical/internal/operand/reference"
 	value "goillogical/internal/operand/value"
+	. "goillogical/internal/test"
 	"regexp"
 	"testing"
 )
@@ -22,12 +22,6 @@ func ref(val string) Evaluable {
 		IgnoredPathsRx: []regexp.Regexp{},
 	}
 	e, _ := reference.New(val, &serOpts, &simOpts)
-	return e
-}
-
-func col(items ...Evaluable) Evaluable {
-	opts := DefaultSerializeOptions()
-	e, _ := New(items, &opts)
 	return e
 }
 
@@ -93,6 +87,12 @@ func TestSimplify(t *testing.T) {
 	ctx := map[string]any{
 		"RefA": "A",
 	}
+
+	col := func(items ...Evaluable) Evaluable {
+		e, _ := New(items, &serOpts)
+		return e
+	}
+
 	tests := []struct {
 		input []Evaluable
 		value any

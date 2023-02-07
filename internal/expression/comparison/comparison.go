@@ -38,7 +38,16 @@ func (c comparison) Serialize() any {
 }
 
 func (c comparison) Simplify(ctx Context) (any, Evaluable) {
-	return nil, nil
+	res := []any{}
+	for _, o := range c.operands {
+		val, e := o.Simplify(ctx)
+		if e != nil {
+			return nil, &c
+		}
+		res = append(res, val)
+	}
+
+	return c.handler(res), nil
 }
 
 func (c comparison) String() string {

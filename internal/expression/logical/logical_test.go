@@ -3,21 +3,18 @@ package logical
 import (
 	. "goillogical/internal"
 	. "goillogical/internal/mock"
+	. "goillogical/internal/test"
 	"testing"
 )
 
 func TestEvaluate(t *testing.T) {
-	e1 := E(true, "e1")
-	e2 := E(false, "e2")
-	e3 := E("bogus", "e3")
-
 	var tests = []struct {
 		evaluable Evaluable
 		expected  bool
 	}{
-		{e1, true},
-		{e2, false},
-		{e3, false},
+		{Val(true), true},
+		{Val(false), false},
+		{Val("val"), false},
 	}
 
 	for _, test := range tests {
@@ -41,7 +38,7 @@ func TestSerialize(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New(test.op, test.op, test.operands, func(Context, []Evaluable) (bool, error) { return false, nil })
+		c, _ := New(test.op, test.op, test.operands, func(Context, []Evaluable) (bool, error) { return false, nil }, func(string, Context, []Evaluable) (any, Evaluable) { return nil, nil })
 		if output := c.Serialize(); Fprint(output) != Fprint(test.expected) {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
 		}
@@ -62,7 +59,7 @@ func TestString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New("Unknown", test.op, test.operands, func(ctx Context, evaluated []Evaluable) (bool, error) { return false, nil })
+		c, _ := New("Unknown", test.op, test.operands, func(ctx Context, evaluated []Evaluable) (bool, error) { return false, nil }, func(string, Context, []Evaluable) (any, Evaluable) { return nil, nil })
 		if output := c.String(); output != test.expected {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, output)
 		}

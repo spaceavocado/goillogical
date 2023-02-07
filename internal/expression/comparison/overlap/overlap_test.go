@@ -1,15 +1,10 @@
 package overlap
 
 import (
-	"fmt"
 	. "goillogical/internal"
 	. "goillogical/internal/mock"
 	"testing"
 )
-
-func e(val any) Evaluable {
-	return E(val, fmt.Sprintf("%v", val))
-}
 
 func TestHandler(t *testing.T) {
 	var tests = []struct {
@@ -18,17 +13,17 @@ func TestHandler(t *testing.T) {
 		expected bool
 	}{
 		// Truthy
-		{e([]any{1}), e([]any{1}), true},
-		{e([]any{1, 2}), e([]any{1, 3}), true},
-		{e([]any{3, 2}), e([]any{1, 2, 3}), true},
-		{e([]any{"1"}), e([]any{"1"}), true},
-		{e([]any{true}), e([]any{true}), true},
-		{e([]any{1.1}), e([]any{1.1}), true},
+		{Col(Val(1)), Col(Val(1)), true},
+		{Col(Val(1), Val(2)), Col(Val(1), Val(3)), true},
+		{Col(Val(3), Val(2)), Col(Val(1), Val(2), Val(3)), true},
+		{Col(Val("1")), Col(Val("1")), true},
+		{Col(Val(true)), Col(Val(true)), true},
+		{Col(Val(1.1)), Col(Val(1.1)), true},
 		// Falsy
-		{e(1), e([]any{1}), false},
-		{e([]any{1}), e(1), false},
-		{e(1), e(1), false},
-		{e([]any{1}), e([]any{2}), false},
+		{Val(1), Col(Val(1)), false},
+		{Col(Val(1)), Val(1), false},
+		{Val(1), Val(1), false},
+		{Col(Val(1)), Col(Val(2)), false},
 	}
 
 	for _, test := range tests {

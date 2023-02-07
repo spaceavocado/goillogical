@@ -1,15 +1,10 @@
 package ne
 
 import (
-	"fmt"
 	. "goillogical/internal"
 	. "goillogical/internal/mock"
 	"testing"
 )
-
-func e(val any) Evaluable {
-	return E(val, fmt.Sprintf("%v", val))
-}
 
 func TestHandler(t *testing.T) {
 	var tests = []struct {
@@ -18,24 +13,24 @@ func TestHandler(t *testing.T) {
 		expected bool
 	}{
 		// Same types
-		{e(1), e(0), true},
-		{e(1), e(1), false},
-		{e(1.1), e(1.0), true},
-		{e(1.1), e(1.1), false},
-		{e("1"), e("2"), true},
-		{e("1"), e("1"), false},
-		{e(true), e(false), true},
-		{e(true), e(true), false},
+		{Val(1), Val(0), true},
+		{Val(1), Val(1), false},
+		{Val(1.1), Val(1.0), true},
+		{Val(1.1), Val(1.1), false},
+		{Val("1"), Val("2"), true},
+		{Val("1"), Val("1"), false},
+		{Val(true), Val(false), true},
+		{Val(true), Val(true), false},
 		// Diff types
-		{e(1), e(1.1), true},
-		{e(1), e("1"), true},
-		{e(1), e(true), true},
-		{e(1.1), e("1"), true},
-		{e(1.1), e(true), true},
-		{e("1"), e(true), true},
+		{Val(1), Val(1.1), true},
+		{Val(1), Val("1"), true},
+		{Val(1), Val(true), true},
+		{Val(1.1), Val("1"), true},
+		{Val(1.1), Val(true), true},
+		{Val("1"), Val(true), true},
 		// Slices
-		{e([]int{1}), e([]int{1}), true},
-		{e(1), e([]int{1}), true},
+		{Col(Val(1)), Col(Val(1)), true},
+		{Val(1), Col(Val(1)), true},
 	}
 
 	for _, test := range tests {

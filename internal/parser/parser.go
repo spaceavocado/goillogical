@@ -36,6 +36,9 @@ type options struct {
 		Reference  reference.SerializeOptions
 		Collection collection.SerializeOptions
 	}
+	Simplify struct {
+		Reference reference.SimplifyOptions
+	}
 }
 
 func expressionUnary(op string, factory func(string, Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
@@ -131,7 +134,7 @@ func createOperand(input any, opts *options) (Evaluable, error) {
 
 	addr, err := toReferenceAddr(input, &opts.Serialize.Reference)
 	if err == nil {
-		return reference.New(addr, &opts.Serialize.Reference)
+		return reference.New(addr, &opts.Serialize.Reference, &opts.Simplify.Reference)
 	}
 
 	if !IsEvaluatedPrimitive(input) {
@@ -199,5 +202,6 @@ func New(opts *Options) Parser {
 	return &parser{opts: options{
 		OperatorHandlers: operatorHandlers(opts.OperatorMapping),
 		Serialize:        opts.Serialize,
+		Simplify:         opts.Simplify,
 	}}
 }

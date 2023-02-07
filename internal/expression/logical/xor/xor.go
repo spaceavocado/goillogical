@@ -4,6 +4,8 @@ import (
 	"errors"
 	. "goillogical/internal"
 	l "goillogical/internal/expression/logical"
+	nor "goillogical/internal/expression/logical/nor"
+	not "goillogical/internal/expression/logical/not"
 )
 
 func xor(a, b bool) bool {
@@ -27,10 +29,50 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 	return out, nil
 }
 
+func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluable) {
+	truthy := 0
+	simplified := []Evaluable{}
+	for _, o := range operands {
+		res, e := o.Simplify(ctx)
+		if b, ok := res.(bool); ok {
+			if b == true {
+				truthy++
+			}
+			if truthy > 1 {
+				return false, nil
+			}
+			continue
+		}
+
+		simplified = append(simplified, e)
+	}
+
+	if len(simplified) == 0 {
+		return truthy == 1, nil
+	}
+
+	if len(simplified) == 1 {
+		if truthy == 1 {
+			e, _ := not.New("NOT", simplified[0])
+			return nil, e
+		}
+		return nil, simplified[0]
+	}
+
+	if truthy == 1 {
+		e, _ := nor.New("NOR", simplified)
+		return nil, e
+	}
+
+	e, _ := New(operator, simplified)
+	return nil, e
+}
+
+// not, nor reference needed
 func New(operator string, operands []Evaluable) (Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical XOR expression must have at least 2 operands")
 	}
 
-	return l.New(operator, "XOR", operands, handler)
+	return l.New(operator, "XOR", operands, handler, simplify)
 }

@@ -3,20 +3,18 @@ package comparison
 import (
 	. "goillogical/internal"
 	. "goillogical/internal/mock"
+	. "goillogical/internal/test"
 	"testing"
 )
 
 func TestEvaluate(t *testing.T) {
-	e1 := E(true, "e1")
-	e2 := E(false, "e2")
-
 	var tests = []struct {
 		op       string
 		operands []Evaluable
 		expected bool
 	}{
-		{"==", []Evaluable{e1, e1}, true},
-		{"==", []Evaluable{e1, e2}, false},
+		{"==", []Evaluable{Val(1), Val(1)}, true},
+		{"==", []Evaluable{Val(1), Val(2)}, false},
 	}
 
 	for _, test := range tests {
@@ -28,16 +26,13 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	e1 := E("e1", "e1")
-	e2 := E("e2", "e2")
-
 	var tests = []struct {
 		op       string
 		operands []Evaluable
 		expected any
 	}{
-		{"->", []Evaluable{e1, e2}, []any{"->", "e1", "e2"}},
-		{"X", []Evaluable{e1}, []any{"X", "e1"}},
+		{"->", []Evaluable{Val(1), Val(1)}, []any{"->", 1, 2}},
+		{"X", []Evaluable{Val(1)}, []any{"X", 1}},
 	}
 
 	for _, test := range tests {
@@ -48,17 +43,45 @@ func TestSerialize(t *testing.T) {
 	}
 }
 
-func TestString(t *testing.T) {
-	e1 := E(true, "e1")
-	e2 := E(false, "e2")
+func TestSimplify(t *testing.T) {
+	ctx := map[string]any{
+		"RefA": "A",
+	}
 
+	eq := func(operands ...Evaluable) Evaluable {
+		e, _ := New("Unknown", "==", operands, func(evaluated []any) bool { return evaluated[0] == evaluated[1] })
+		return e
+	}
+
+	tests := []struct {
+		input []Evaluable
+		value any
+		e     any
+	}{
+		{[]Evaluable{Val(0), Ref("Missing")}, nil, eq(Val(0), Ref("Missing"))},
+		{[]Evaluable{Ref("Missing"), Val(0)}, nil, eq(Ref("Missing"), Val(0))},
+		{[]Evaluable{Ref("Missing"), Ref("Missing")}, nil, eq(Ref("Missing"), Ref("Missing"))},
+		{[]Evaluable{Val(0), Val(0)}, true, nil},
+		{[]Evaluable{Val(0), Val(1)}, false, nil},
+		{[]Evaluable{Val("A"), Ref("RefA")}, true, nil},
+	}
+
+	for _, test := range tests {
+		e := eq(test.input...)
+		if value, self := e.Simplify(ctx); Fprint(value) != Fprint(test.value) || Fprint(self) != Fprint(test.e) {
+			t.Errorf("input (%v): expected %v/%v, got %v/%v", test.input, test.value, test.e, value, self)
+		}
+	}
+}
+
+func TestString(t *testing.T) {
 	var tests = []struct {
 		op       string
 		operands []Evaluable
 		expected string
 	}{
-		{"==", []Evaluable{e1, e2}, "(e1 == e2)"},
-		{"<nil>", []Evaluable{e1}, "(e1 <nil>)"},
+		{"==", []Evaluable{Val(1), Val(2)}, "(1 == 2)"},
+		{"<nil>", []Evaluable{Val(1)}, "(1 <nil>)"},
 	}
 
 	for _, test := range tests {

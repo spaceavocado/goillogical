@@ -53,6 +53,12 @@ func WithCollectionSerializeOptions(o c.SerializeOptions) Option {
 	}
 }
 
+func WithReferenceSimplifyOptions(o r.SimplifyOptions) Option {
+	return func(i *illogical) {
+		i.opts.Simplify.Reference = o
+	}
+}
+
 func WithOperatorMappingOptions(m OperatorMapping) Option {
 	return func(i *illogical) {
 		i.opts.OperatorMapping = m
