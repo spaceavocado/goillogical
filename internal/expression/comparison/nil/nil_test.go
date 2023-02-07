@@ -1,9 +1,10 @@
 package nil
 
 import (
-	. "goillogical/internal"
-	. "goillogical/internal/mock"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal/mock"
 )
 
 func TestHandler(t *testing.T) {

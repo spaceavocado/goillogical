@@ -3,10 +3,11 @@ package reference
 import (
 	"errors"
 	"fmt"
-	. "goillogical/internal"
-	. "goillogical/internal/test"
 	"regexp"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func ref(val string) Evaluable {

@@ -2,9 +2,10 @@ package reference
 
 import (
 	"errors"
-	. "goillogical/internal"
 	"strconv"
 	"strings"
+
+	. "github.com/spaceavocado/goillogical/internal"
 
 	"fmt"
 	"regexp"

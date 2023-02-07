@@ -1,9 +1,10 @@
 package overlap
 
 import (
-	. "goillogical/internal"
-	c "goillogical/internal/expression/comparison"
 	"reflect"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
 func handler(evaluated []any) bool {

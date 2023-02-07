@@ -1,8 +1,8 @@
 package le
 
 import (
-	. "goillogical/internal"
-	c "goillogical/internal/expression/comparison"
+	. "github.com/spaceavocado/goillogical/internal"
+	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
 func op[T c.Number](a T, b T) bool {

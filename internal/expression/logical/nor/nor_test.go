@@ -2,11 +2,12 @@ package nor
 
 import (
 	"errors"
-	. "goillogical/internal"
-	not "goillogical/internal/expression/logical/not"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestHandler(t *testing.T) {

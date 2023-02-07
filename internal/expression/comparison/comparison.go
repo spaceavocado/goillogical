@@ -2,8 +2,9 @@ package comparison
 
 import (
 	"fmt"
-	. "goillogical/internal"
 	"reflect"
+
+	. "github.com/spaceavocado/goillogical/internal"
 )
 
 type Number interface {
@@ -31,7 +32,7 @@ func (c comparison) Evaluate(ctx Context) (any, error) {
 
 func (c comparison) Serialize() any {
 	res := []any{c.kind}
-	for i := 1; i < len(c.operands); i++ {
+	for i := 0; i < len(c.operands); i++ {
 		res = append(res, c.operands[i].Serialize())
 	}
 	return res

@@ -1,13 +1,14 @@
 package collection
 
 import (
-	. "goillogical/internal"
-	eq "goillogical/internal/expression/comparison/eq"
-	reference "goillogical/internal/operand/reference"
-	value "goillogical/internal/operand/value"
-	. "goillogical/internal/test"
 	"regexp"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
+	reference "github.com/spaceavocado/goillogical/internal/operand/reference"
+	value "github.com/spaceavocado/goillogical/internal/operand/value"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func val(val any) Evaluable {

@@ -2,10 +2,11 @@ package and
 
 import (
 	"errors"
-	. "goillogical/internal"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestHandler(t *testing.T) {

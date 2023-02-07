@@ -2,7 +2,8 @@ package logical
 
 import (
 	"fmt"
-	. "goillogical/internal"
+
+	. "github.com/spaceavocado/goillogical/internal"
 )
 
 type Handler func(Context, []Evaluable) (bool, error)
@@ -22,7 +23,7 @@ func (l logical) Evaluate(ctx Context) (any, error) {
 
 func (l logical) Serialize() any {
 	res := []any{l.kind}
-	for i := 1; i < len(l.operands); i++ {
+	for i := 0; i < len(l.operands); i++ {
 		res = append(res, l.operands[i].Serialize())
 	}
 	return res

@@ -2,12 +2,13 @@ package xor
 
 import (
 	"errors"
-	. "goillogical/internal"
-	nor "goillogical/internal/expression/logical/nor"
-	not "goillogical/internal/expression/logical/not"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	nor "github.com/spaceavocado/goillogical/internal/expression/logical/nor"
+	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestHandler(t *testing.T) {

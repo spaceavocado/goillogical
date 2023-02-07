@@ -1,11 +1,12 @@
 package mock
 
 import (
-	. "goillogical/internal"
-	collection "goillogical/internal/operand/collection"
-	reference "goillogical/internal/operand/reference"
-	value "goillogical/internal/operand/value"
 	"regexp"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	collection "github.com/spaceavocado/goillogical/internal/operand/collection"
+	reference "github.com/spaceavocado/goillogical/internal/operand/reference"
+	value "github.com/spaceavocado/goillogical/internal/operand/value"
 )
 
 func Val(val any) Evaluable {

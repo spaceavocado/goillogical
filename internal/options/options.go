@@ -1,10 +1,11 @@
 package options
 
 import (
-	. "goillogical/internal"
-	c "goillogical/internal/operand/collection"
-	r "goillogical/internal/operand/reference"
 	"regexp"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	c "github.com/spaceavocado/goillogical/internal/operand/collection"
+	r "github.com/spaceavocado/goillogical/internal/operand/reference"
 )
 
 type Options struct {

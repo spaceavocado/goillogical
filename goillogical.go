@@ -1,11 +1,11 @@
 package goillogical
 
 import (
-	. "goillogical/internal"
-	c "goillogical/internal/operand/collection"
-	r "goillogical/internal/operand/reference"
-	. "goillogical/internal/options"
-	p "goillogical/internal/parser"
+	. "github.com/spaceavocado/goillogical/internal"
+	c "github.com/spaceavocado/goillogical/internal/operand/collection"
+	r "github.com/spaceavocado/goillogical/internal/operand/reference"
+	. "github.com/spaceavocado/goillogical/internal/options"
+	p "github.com/spaceavocado/goillogical/internal/parser"
 )
 
 type Goillogical interface {
