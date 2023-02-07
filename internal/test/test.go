@@ -11,6 +11,6 @@ func Fprint(input any) string {
 		return v.String()
 	}
 
-	res, _ := json.Marshal(true)
+	res, _ := json.Marshal(input)
 	return string(res)
 }

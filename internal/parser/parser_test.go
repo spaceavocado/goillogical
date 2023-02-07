@@ -24,35 +24,11 @@ import (
 	. "goillogical/internal/mock"
 	reference "goillogical/internal/operand/reference"
 	. "goillogical/internal/options"
-	"regexp"
 	"testing"
 )
 
 func addr(val string, opts Options) string {
 	return opts.Serialize.Reference.To(val)
-}
-
-func ref(val string) Evaluable {
-	serOpts := reference.DefaultSerializeOptions()
-	simOpts := reference.SimplifyOptions{
-		IgnoredPaths:   []string{},
-		IgnoredPathsRx: []regexp.Regexp{},
-	}
-	e, _ := reference.New(val, &serOpts, &simOpts)
-	return e
-}
-
-func expUnary(op string, factory func(string, Evaluable) (Evaluable, error), eval Evaluable) Evaluable {
-	e, _ := factory(op, eval)
-	return e
-}
-func expBinary(op string, factory func(string, Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
-	e, _ := factory(op, left, right)
-	return e
-}
-func expMany(op string, factory func(string, []Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
-	e, _ := factory(op, operands)
-	return e
 }
 
 func TestIsEscaped(t *testing.T) {
@@ -142,7 +118,7 @@ func TestReference(t *testing.T) {
 		input    string
 		expected Evaluable
 	}{
-		{addr("path", opts), ref("path")},
+		{addr("path", opts), Ref("path")},
 	}
 
 	for _, test := range tests {
@@ -163,8 +139,8 @@ func TestCollection(t *testing.T) {
 		{[]any{1}, Col(Val(1))},
 		{[]any{"val"}, Col(Val("val"))},
 		{[]any{true}, Col(Val(true))},
-		{[]any{addr("ref", opts)}, Col(ref("ref"))},
-		{[]any{1, "val", true, addr("ref", opts)}, Col(Val(1), Val("val"), Val(true), ref("ref"))},
+		{[]any{addr("ref", opts)}, Col(Ref("ref"))},
+		{[]any{1, "val", true, addr("ref", opts)}, Col(Val(1), Val("val"), Val(true), Ref("ref"))},
 		// escaped
 		{[]any{fmt.Sprintf("%s%s", opts.Serialize.Collection.EscapeCharacter, opts.OperatorMapping[Eq]), 1}, Col(Val(opts.OperatorMapping[Eq]), Val(1))},
 	}
@@ -184,18 +160,18 @@ func TestComparison(t *testing.T) {
 		input    []any
 		expected Evaluable
 	}{
-		{[]any{opts.OperatorMapping[Eq], 1, 1}, expBinary("OP", eq.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Ne], 1, 1}, expBinary("OP", ne.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Gt], 1, 1}, expBinary("OP", gt.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Ge], 1, 1}, expBinary("OP", ge.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Lt], 1, 1}, expBinary("OP", lt.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Le], 1, 1}, expBinary("OP", le.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[In], 1, 1}, expBinary("OP", in.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Nin], 1, 1}, expBinary("OP", nin.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Nil], 1, 1}, expUnary("OP", null.New, Val(1))},
-		{[]any{opts.OperatorMapping[Present], 1, 1}, expUnary("OP", present.New, Val(1))},
-		{[]any{opts.OperatorMapping[Suffix], 1, 1}, expBinary("OP", suffix.New, Val(1), Val(1))},
-		{[]any{opts.OperatorMapping[Prefix], 1, 1}, expBinary("OP", prefix.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Eq], 1, 1}, ExpBinary("OP", eq.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Ne], 1, 1}, ExpBinary("OP", ne.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Gt], 1, 1}, ExpBinary("OP", gt.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Ge], 1, 1}, ExpBinary("OP", ge.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Lt], 1, 1}, ExpBinary("OP", lt.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Le], 1, 1}, ExpBinary("OP", le.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[In], 1, 1}, ExpBinary("OP", in.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Nin], 1, 1}, ExpBinary("OP", nin.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Nil], 1, 1}, ExpUnary("OP", null.New, Val(1))},
+		{[]any{opts.OperatorMapping[Present], 1, 1}, ExpUnary("OP", present.New, Val(1))},
+		{[]any{opts.OperatorMapping[Suffix], 1, 1}, ExpBinary("OP", suffix.New, Val(1), Val(1))},
+		{[]any{opts.OperatorMapping[Prefix], 1, 1}, ExpBinary("OP", prefix.New, Val(1), Val(1))},
 	}
 
 	for _, test := range tests {
@@ -213,11 +189,11 @@ func TestLogical(t *testing.T) {
 		input    []any
 		expected Evaluable
 	}{
-		{[]any{opts.OperatorMapping[And], true, true}, expMany("OP", and.New, Val(true), Val(true))},
-		{[]any{opts.OperatorMapping[Or], true, true}, expMany("OP", or.New, Val(true), Val(true))},
-		{[]any{opts.OperatorMapping[Nor], true, true}, expMany("OP", nor.New, Val(true), Val(true))},
-		{[]any{opts.OperatorMapping[Xor], true, true}, expMany("OP", xor.New, Val(true), Val(true))},
-		{[]any{opts.OperatorMapping[Not], true, true}, expUnary("OP", not.New, Val(true))},
+		{[]any{opts.OperatorMapping[And], true, true}, ExpMany("OP", and.New, Val(true), Val(true))},
+		{[]any{opts.OperatorMapping[Or], true, true}, ExpMany("OP", or.New, Val(true), Val(true))},
+		{[]any{opts.OperatorMapping[Nor], true, true}, ExpMany("OP", nor.New, Val(true), Val(true))},
+		{[]any{opts.OperatorMapping[Xor], true, true}, ExpMany("OP", xor.New, Val(true), Val(true))},
+		{[]any{opts.OperatorMapping[Not], true, true}, ExpUnary("OP", not.New, Val(true))},
 	}
 
 	for _, test := range tests {

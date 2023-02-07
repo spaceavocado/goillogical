@@ -25,16 +25,13 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	e1 := E("e1", "e1")
-	e2 := E("e2", "e2")
-
 	var tests = []struct {
 		op       string
 		operands []Evaluable
 		expected any
 	}{
-		{"->", []Evaluable{e1, e2}, []any{"->", "e1", "e2"}},
-		{"X", []Evaluable{e1}, []any{"X", "e1"}},
+		{"->", []Evaluable{Val("e1"), Val("e2")}, []any{"->", "e1", "e2"}},
+		{"X", []Evaluable{Val("e1")}, []any{"X", "e1"}},
 	}
 
 	for _, test := range tests {
@@ -46,16 +43,13 @@ func TestSerialize(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	e1 := E(true, "e1")
-	e2 := E(false, "e2")
-
 	var tests = []struct {
 		op       string
 		operands []Evaluable
 		expected string
 	}{
-		{"AND", []Evaluable{e1, e2}, "(e1 AND e2)"},
-		{"AND", []Evaluable{e1, e2, e1}, "(e1 AND e2 AND e1)"},
+		{"AND", []Evaluable{Val("e1"), Val("e2")}, "(\"e1\" AND \"e2\")"},
+		{"AND", []Evaluable{Val("e1"), Val("e2"), Val("e1")}, "(\"e1\" AND \"e2\" AND \"e1\")"},
 	}
 
 	for _, test := range tests {

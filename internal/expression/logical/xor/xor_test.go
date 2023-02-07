@@ -26,7 +26,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New("XOR", test.operands)
+		c, _ := New("XOR", test.operands, "NOT", "NOR")
 		if output, err := c.Evaluate(map[string]any{}); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v/%v", test.operands, test.expected, output, err)
 		}
@@ -43,7 +43,7 @@ func TestHandler(t *testing.T) {
 
 	for _, test := range errs {
 
-		if _, err := New("XOR", test.operands); err.Error() != test.expected.Error() {
+		if _, err := New("XOR", test.operands, "NOT", "NOR"); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.operands, test.expected, err)
 		}
 	}
@@ -55,7 +55,7 @@ func TestSimplify(t *testing.T) {
 	}
 
 	exp := func(operands ...Evaluable) Evaluable {
-		e, _ := New("XOR", operands)
+		e, _ := New("XOR", operands, "NOT", "NOR")
 		return e
 	}
 
@@ -65,7 +65,7 @@ func TestSimplify(t *testing.T) {
 	}
 
 	flip := func(operands ...Evaluable) Evaluable {
-		e, _ := nor.New("NOR", operands)
+		e, _ := nor.New("NOR", operands, "NOT", "NOR")
 		return e
 	}
 

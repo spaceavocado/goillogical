@@ -8,35 +8,6 @@ import (
 	"regexp"
 )
 
-type eMock struct {
-	val any
-	str string
-}
-
-func (m eMock) Kind() Kind {
-	return Unknown
-}
-
-func (m eMock) String() string {
-	return m.str
-}
-
-func (m eMock) Evaluate(ctx Context) (any, error) {
-	return m.val, nil
-}
-
-func (m eMock) Serialize() any {
-	return m.val
-}
-
-func (m eMock) Simplify(ctx Context) (any, Evaluable) {
-	return m.val, nil
-}
-
-func E(val any, str string) Evaluable {
-	return eMock{val, str}
-}
-
 func Val(val any) Evaluable {
 	e, _ := value.New(val)
 	return e
@@ -55,5 +26,20 @@ func Ref(val string) Evaluable {
 func Col(items ...Evaluable) Evaluable {
 	opts := collection.DefaultSerializeOptions()
 	e, _ := collection.New(items, &opts)
+	return e
+}
+
+func ExpUnary(op string, factory func(string, Evaluable) (Evaluable, error), eval Evaluable) Evaluable {
+	e, _ := factory(op, eval)
+	return e
+}
+
+func ExpBinary(op string, factory func(string, Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
+	e, _ := factory(op, left, right)
+	return e
+}
+
+func ExpMany(op string, factory func(string, []Evaluable, string, string) (Evaluable, error), operands ...Evaluable) Evaluable {
+	e, _ := factory(op, operands, "", "")
 	return e
 }

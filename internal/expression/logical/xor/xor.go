@@ -29,7 +29,7 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 	return out, nil
 }
 
-func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluable) {
+func simplify(operator string, ctx Context, operands []Evaluable, notOp string, norOp string) (any, Evaluable) {
 	truthy := 0
 	simplified := []Evaluable{}
 	for _, o := range operands {
@@ -53,26 +53,28 @@ func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluabl
 
 	if len(simplified) == 1 {
 		if truthy == 1 {
-			e, _ := not.New("NOT", simplified[0])
+			e, _ := not.New(notOp, simplified[0])
 			return nil, e
 		}
 		return nil, simplified[0]
 	}
 
 	if truthy == 1 {
-		e, _ := nor.New("NOR", simplified)
+		e, _ := nor.New(norOp, simplified, notOp, norOp)
 		return nil, e
 	}
 
-	e, _ := New(operator, simplified)
+	e, _ := New(operator, simplified, notOp, norOp)
 	return nil, e
 }
 
 // not, nor reference needed
-func New(operator string, operands []Evaluable) (Evaluable, error) {
+func New(operator string, operands []Evaluable, notOp string, norOp string) (Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical XOR expression must have at least 2 operands")
 	}
 
-	return l.New(operator, "XOR", operands, handler, simplify)
+	return l.New(operator, "XOR", operands, handler, func(operator string, ctx map[string]any, operands []Evaluable) (any, Evaluable) {
+		return simplify(operator, ctx, operands, notOp, norOp)
+	})
 }

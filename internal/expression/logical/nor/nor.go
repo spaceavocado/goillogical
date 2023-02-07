@@ -20,7 +20,7 @@ func handler(ctx Context, operands []Evaluable) (bool, error) {
 	return true, nil
 }
 
-func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluable) {
+func simplify(operator string, ctx Context, operands []Evaluable, notOp string) (any, Evaluable) {
 	simplified := []Evaluable{}
 	for _, o := range operands {
 		res, e := o.Simplify(ctx)
@@ -43,15 +43,17 @@ func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluabl
 		return nil, e
 	}
 
-	e, _ := New(operator, simplified)
+	e, _ := New(operator, simplified, notOp, "")
 	return nil, e
 }
 
 // not reference needed
-func New(operator string, operands []Evaluable) (Evaluable, error) {
+func New(operator string, operands []Evaluable, notOp string, norOp string) (Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical NOR expression must have at least 2 operands")
 	}
 
-	return l.New(operator, "NOR", operands, handler, simplify)
+	return l.New(operator, "NOR", operands, handler, func(operator string, ctx map[string]any, operands []Evaluable) (any, Evaluable) {
+		return simplify(operator, ctx, operands, notOp)
+	})
 }

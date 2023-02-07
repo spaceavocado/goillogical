@@ -41,14 +41,16 @@ func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluabl
 		return nil, simplified[0]
 	}
 
-	e, _ := New(operator, simplified)
+	e, _ := New(operator, simplified, "", "")
 	return nil, e
 }
 
-func New(operator string, operands []Evaluable) (Evaluable, error) {
+func New(operator string, operands []Evaluable, notOp string, norOp string) (Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical AND expression must have at least 2 operands")
 	}
 
-	return l.New(operator, "AND", operands, handler, simplify)
+	return l.New(operator, "AND", operands, handler, func(operator string, ctx map[string]any, operands []Evaluable) (any, Evaluable) {
+		return simplify(operator, ctx, operands)
+	})
 }

@@ -9,16 +9,6 @@ import (
 	"testing"
 )
 
-func expBinary(op string, factory func(string, Evaluable, Evaluable) (Evaluable, error), left, right Evaluable) Evaluable {
-	e, _ := factory(op, left, right)
-	return e
-}
-
-func expMany(op string, factory func(string, []Evaluable) (Evaluable, error), operands ...Evaluable) Evaluable {
-	e, _ := factory(op, operands)
-	return e
-}
-
 func TestEvaluate(t *testing.T) {
 	illogical := New()
 	ctx := map[string]any{
@@ -73,9 +63,9 @@ func TestParse(t *testing.T) {
 		{true, Val(true)},
 		{"val", Val("val")},
 		{"$refA", Ref("refA")},
-		{[]any{"==", 1, 1}, expBinary("OP", eq.New, Val(1), Val(1))},
-		{[]any{"==", "$refA", "resolvedA"}, expBinary("OP", eq.New, Ref("refA"), Val("resolvedA"))},
-		{[]any{"AND", []any{"==", 1, 1}, []any{"==", 2, 1}}, expMany("OP", and.New, expBinary("OP", eq.New, Val(1), Val(1)), expBinary("OP", eq.New, Val(2), Val(1)))},
+		{[]any{"==", 1, 1}, ExpBinary("OP", eq.New, Val(1), Val(1))},
+		{[]any{"==", "$refA", "resolvedA"}, ExpBinary("OP", eq.New, Ref("refA"), Val("resolvedA"))},
+		{[]any{"AND", []any{"==", 1, 1}, []any{"==", 2, 1}}, ExpMany("OP", and.New, ExpBinary("OP", eq.New, Val(1), Val(1)), ExpBinary("OP", eq.New, Val(2), Val(1)))},
 	}
 
 	for _, test := range tests {

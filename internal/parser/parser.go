@@ -53,19 +53,19 @@ func expressionBinary(op string, factory func(string, Evaluable, Evaluable) (Eva
 	}
 }
 
-func expressionMany(op string, factory func(string, []Evaluable) (Evaluable, error)) func([]Evaluable) (Evaluable, error) {
+func expressionMany(op string, factory func(string, []Evaluable, string, string) (Evaluable, error), notOp string, norOp string) func([]Evaluable) (Evaluable, error) {
 	return func(operands []Evaluable) (Evaluable, error) {
-		return factory(op, operands)
+		return factory(op, operands, notOp, norOp)
 	}
 }
 
 func operatorHandlers(opts OperatorMapping) map[string]func([]Evaluable) (Evaluable, error) {
 	return map[string]func([]Evaluable) (Evaluable, error){
 		// Logical
-		opts[And]: expressionMany(opts[And], and.New),
-		opts[Or]:  expressionMany(opts[Or], or.New),
-		opts[Nor]: expressionMany(opts[Nor], nor.New),
-		opts[Xor]: expressionMany(opts[Xor], xor.New),
+		opts[And]: expressionMany(opts[And], and.New, opts[Not], opts[Nor]),
+		opts[Or]:  expressionMany(opts[Or], or.New, opts[Not], opts[Nor]),
+		opts[Nor]: expressionMany(opts[Nor], nor.New, opts[Not], opts[Nor]),
+		opts[Xor]: expressionMany(opts[Xor], xor.New, opts[Not], opts[Nor]),
 		opts[Not]: expressionUnary(opts[Not], not.New),
 		// Comparison
 		opts[Eq]:      expressionBinary(opts[Eq], eq.New),
