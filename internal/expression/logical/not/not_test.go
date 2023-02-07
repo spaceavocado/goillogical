@@ -2,10 +2,11 @@ package not
 
 import (
 	"errors"
-	. "goillogical/internal"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestHandler(t *testing.T) {
@@ -57,7 +58,7 @@ func TestSimplify(t *testing.T) {
 		{Val(true), false, nil},
 		{Val(false), true, nil},
 		{Ref("RefA"), false, nil},
-		{Ref("Missing"), false, exp(Ref("Missing"))},
+		{Ref("Missing"), nil, exp(Ref("Missing"))},
 	}
 
 	for _, test := range tests {

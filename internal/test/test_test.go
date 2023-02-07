@@ -1,8 +1,9 @@
 package test
 
 import (
-	. "goillogical/internal/mock"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal/mock"
 )
 
 func TestFprint(t *testing.T) {

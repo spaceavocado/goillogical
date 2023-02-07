@@ -2,11 +2,12 @@ package goillogical
 
 import (
 	"errors"
-	. "goillogical/internal"
-	eq "goillogical/internal/expression/comparison/eq"
-	and "goillogical/internal/expression/logical/and"
-	. "goillogical/internal/mock"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
+	and "github.com/spaceavocado/goillogical/internal/expression/logical/and"
+	. "github.com/spaceavocado/goillogical/internal/mock"
 )
 
 func TestEvaluate(t *testing.T) {

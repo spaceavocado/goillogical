@@ -1,8 +1,8 @@
 package eq
 
 import (
-	. "goillogical/internal"
-	c "goillogical/internal/expression/comparison"
+	. "github.com/spaceavocado/goillogical/internal"
+	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
 func handler(evaluated []any) bool {

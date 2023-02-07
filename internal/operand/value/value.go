@@ -1,7 +1,7 @@
 package value
 
 import (
-	. "goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal"
 
 	"errors"
 	"fmt"

@@ -3,7 +3,8 @@ package collection
 import (
 	"errors"
 	"fmt"
-	. "goillogical/internal"
+
+	. "github.com/spaceavocado/goillogical/internal"
 )
 
 type SerializeOptions struct {

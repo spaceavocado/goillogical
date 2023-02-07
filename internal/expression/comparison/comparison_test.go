@@ -1,10 +1,11 @@
 package comparison
 
 import (
-	. "goillogical/internal"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestEvaluate(t *testing.T) {
@@ -31,7 +32,7 @@ func TestSerialize(t *testing.T) {
 		operands []Evaluable
 		expected any
 	}{
-		{"->", []Evaluable{Val(1), Val(1)}, []any{"->", 1, 2}},
+		{"->", []Evaluable{Val(1), Val(2)}, []any{"->", 1, 2}},
 		{"X", []Evaluable{Val(1)}, []any{"X", 1}},
 	}
 

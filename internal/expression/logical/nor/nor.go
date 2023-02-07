@@ -2,9 +2,10 @@ package nor
 
 import (
 	"errors"
-	. "goillogical/internal"
-	l "goillogical/internal/expression/logical"
-	not "goillogical/internal/expression/logical/not"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	l "github.com/spaceavocado/goillogical/internal/expression/logical"
+	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
 )
 
 func handler(ctx Context, operands []Evaluable) (bool, error) {

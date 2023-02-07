@@ -2,10 +2,11 @@ package xor
 
 import (
 	"errors"
-	. "goillogical/internal"
-	l "goillogical/internal/expression/logical"
-	nor "goillogical/internal/expression/logical/nor"
-	not "goillogical/internal/expression/logical/not"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	l "github.com/spaceavocado/goillogical/internal/expression/logical"
+	nor "github.com/spaceavocado/goillogical/internal/expression/logical/nor"
+	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
 )
 
 func xor(a, b bool) bool {

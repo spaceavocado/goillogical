@@ -1,13 +1,14 @@
 package collection
 
 import (
-	. "goillogical/internal"
-	eq "goillogical/internal/expression/comparison/eq"
-	reference "goillogical/internal/operand/reference"
-	value "goillogical/internal/operand/value"
-	. "goillogical/internal/test"
 	"regexp"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
+	reference "github.com/spaceavocado/goillogical/internal/operand/reference"
+	value "github.com/spaceavocado/goillogical/internal/operand/value"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func val(val any) Evaluable {
@@ -69,8 +70,8 @@ func TestSerialize(t *testing.T) {
 		{[]Evaluable{val(true)}, []any{true}},
 		{[]Evaluable{ref("RefA")}, []any{"$RefA"}},
 		{[]Evaluable{val(1), ref("RefA")}, []any{1, "$RefA"}},
-		{[]Evaluable{expBinary(eq.New, val(1), val(1)), ref("RefA")}, []any{[]any{"AND", 1, 1}, "$RefA"}},
-		{[]Evaluable{val("=="), val(1), val(1)}, []any{"\\==", "1", "1"}},
+		{[]Evaluable{expBinary(eq.New, val(1), val(1)), ref("RefA")}, []any{[]any{"EXP", 1, 1}, "$RefA"}},
+		{[]Evaluable{val("=="), val(1), val(1)}, []any{"\\==", 1, 1}},
 	}
 
 	for _, test := range tests {

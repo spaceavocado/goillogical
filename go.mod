@@ -1,4 +1,3 @@
-// module github.com/spaceavocado/goillogical
-module goillogical
+module github.com/spaceavocado/goillogical
 
-go 1.19
+go 1.20

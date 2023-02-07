@@ -2,12 +2,13 @@ package xor
 
 import (
 	"errors"
-	. "goillogical/internal"
-	nor "goillogical/internal/expression/logical/nor"
-	not "goillogical/internal/expression/logical/not"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	nor "github.com/spaceavocado/goillogical/internal/expression/logical/nor"
+	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestHandler(t *testing.T) {
@@ -75,7 +76,7 @@ func TestSimplify(t *testing.T) {
 		e     any
 	}{
 		{[]Evaluable{Val(false), Val(false)}, false, nil},
-		{[]Evaluable{Ref("RefA"), Val(true)}, true, nil},
+		{[]Evaluable{Ref("RefA"), Val(true)}, false, nil},
 		{[]Evaluable{Ref("Missing"), Val(true), Ref("Missing")}, nil, flip(Ref("Missing"), Ref("Missing"))},
 		{[]Evaluable{Ref("Missing"), Val(true), Val(false)}, nil, neg(Ref("Missing"))},
 		{[]Evaluable{Ref("RefA"), Ref("RefA"), Val(true)}, false, nil},

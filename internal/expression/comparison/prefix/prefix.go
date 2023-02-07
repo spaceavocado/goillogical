@@ -1,9 +1,10 @@
 package prefix
 
 import (
-	. "goillogical/internal"
-	c "goillogical/internal/expression/comparison"
 	"strings"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
 func op(a string, b string) bool {

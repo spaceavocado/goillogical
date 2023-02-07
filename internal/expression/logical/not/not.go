@@ -2,8 +2,9 @@ package not
 
 import (
 	"errors"
-	. "goillogical/internal"
-	l "goillogical/internal/expression/logical"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	l "github.com/spaceavocado/goillogical/internal/expression/logical"
 )
 
 func handler(ctx Context, operands []Evaluable) (bool, error) {

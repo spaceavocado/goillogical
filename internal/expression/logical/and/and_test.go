@@ -2,10 +2,11 @@ package and
 
 import (
 	"errors"
-	. "goillogical/internal"
-	. "goillogical/internal/mock"
-	. "goillogical/internal/test"
 	"testing"
+
+	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/internal/mock"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestHandler(t *testing.T) {
@@ -63,7 +64,7 @@ func TestSimplify(t *testing.T) {
 	}{
 		{[]Evaluable{Val(true), Val(true)}, true, nil},
 		{[]Evaluable{Val(true), Val(false)}, false, nil},
-		{[]Evaluable{Ref("RefA"), Val(true)}, false, nil},
+		{[]Evaluable{Ref("RefA"), Val(true)}, true, nil},
 		{[]Evaluable{Ref("Missing"), Val(true)}, nil, Ref("Missing")},
 		{[]Evaluable{Ref("Missing"), Ref("Missing")}, nil, exp(Ref("Missing"), Ref("Missing"))},
 	}
