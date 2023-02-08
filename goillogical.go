@@ -12,6 +12,7 @@ type Goillogical interface {
 	Evaluate(any, Context) (any, error)
 	Parse(any) (Evaluable, error)
 	Statement(any) (string, error)
+	Simplify(any, Context) (any, Evaluable, error)
 }
 
 type illogical struct {
@@ -39,6 +40,16 @@ func (i illogical) Statement(exp any) (string, error) {
 	return e.String(), nil
 }
 
+func (i illogical) Simplify(exp any, ctx Context) (any, Evaluable, error) {
+	e, err := i.parser.Parse(exp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	val, eval := e.Simplify(ctx)
+	return val, eval, nil
+}
+
 type Option func(*illogical)
 
 func WithReferenceSerializeOptions(o r.SerializeOptions) Option {
@@ -64,6 +75,10 @@ func WithOperatorMappingOptions(m OperatorMapping) Option {
 		i.opts.OperatorMapping = m
 	}
 }
+
+type SimplifyOptions = r.SimplifyOptions
+type ReferenceSerializeOptions = r.SerializeOptions
+type CollectionSerializeOptions = c.SerializeOptions
 
 func New(opts ...Option) Goillogical {
 	i := &illogical{DefaultOptions(), nil}
