@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/spaceavocado/goillogical/evaluable"
+	e "github.com/spaceavocado/goillogical/evaluable"
 
 	"fmt"
 	"regexp"
@@ -39,11 +39,11 @@ type DataType string
 
 const (
 	Undefined DataType = "Undefined"
-	Number             = "Number"
-	Integer            = "Integer"
-	Float              = "Float"
-	String             = "String"
-	Boolean            = "Boolean"
+	Number    DataType = "Number"
+	Integer   DataType = "Integer"
+	Float     DataType = "Float"
+	String    DataType = "String"
+	Boolean   DataType = "Boolean"
 )
 
 type reference struct {
@@ -54,7 +54,7 @@ type reference struct {
 	simOpts *SimplifyOptions
 }
 
-func (r reference) Evaluate(ctx Context) (any, error) {
+func (r reference) Evaluate(ctx e.Context) (any, error) {
 	_, res, err := evaluate(ctx, r.path, r.dt)
 	return res, err
 }
@@ -69,7 +69,7 @@ func (r reference) Serialize() any {
 	return r.serOpts.To(path)
 }
 
-func (r reference) Simplify(ctx Context) (any, Evaluable) {
+func (r reference) Simplify(ctx e.Context) (any, e.Evaluable) {
 	path, res, _ := evaluate(ctx, r.path, r.dt)
 	if res != nil || isIgnoredPath(path, r.simOpts) {
 		return res, nil
@@ -97,7 +97,7 @@ func getDataType(path string) (DataType, error) {
 		case "Boolean":
 			return Boolean, nil
 		default:
-			return Undefined, errors.New(fmt.Sprintf("unsupported \"%s\" type casting", matches[1]))
+			return Undefined, fmt.Errorf("unsupported \"%s\" type casting", matches[1])
 		}
 	}
 	return Undefined, nil
@@ -138,62 +138,62 @@ func toNumber(val any) (any, error) {
 			return result, nil
 		}
 
-		return 0, errors.New(fmt.Sprintf("invalid conversion from from \"%s\" (string) to number", val))
+		return 0, fmt.Errorf("invalid conversion from from \"%s\" (string) to number", val)
 	}
 
-	switch val.(type) {
+	switch typed := val.(type) {
 	case int, float32, float64:
 		return val, nil
 	case string:
-		return fromString(val.(string))
+		return fromString(typed)
 	case bool:
-		if val.(bool) == true {
+		if typed {
 			return 1, nil
 		}
 		return 0, nil
 	default:
-		return 0, errors.New(fmt.Sprintf("invalid conversion from from \"%v\" to number", val))
+		return 0, fmt.Errorf("invalid conversion from from \"%v\" to number", val)
 	}
 }
 
 func toInteger(val any) (any, error) {
-	switch val.(type) {
+	switch typed := val.(type) {
 	case int:
 		return val, nil
 	case float32:
-		return int(val.(float32)), nil
+		return int(typed), nil
 	case float64:
-		return int(val.(float64)), nil
+		return int(typed), nil
 	case string:
 		res, err := strconv.ParseFloat(val.(string), 64)
 		if err != nil {
-			return 0, errors.New(fmt.Sprintf("invalid conversion from from \"%v\" (string) to integer", val))
+			return 0, fmt.Errorf("invalid conversion from from \"%v\" (string) to integer", val)
 		}
 		return int(res), nil
 	case bool:
-		if val.(bool) == true {
+		if typed {
 			return 1, nil
 		}
 		return 0, nil
 	default:
-		return 0, errors.New(fmt.Sprintf("invalid conversion from from \"%v\" to integer", val))
+		return 0, fmt.Errorf("invalid conversion from from \"%v\" to integer", val)
 	}
 }
 
 func toFloat(val any) (any, error) {
-	switch val.(type) {
+	switch typed := val.(type) {
 	case int:
-		return float64(val.(int)), nil
+		return float64(typed), nil
 	case float32, float64:
 		return val, nil
 	case string:
 		res, err := strconv.ParseFloat(val.(string), 64)
 		if err != nil {
-			return 0, errors.New(fmt.Sprintf("invalid conversion from from \"%v\" (string) to float", val))
+			return 0, fmt.Errorf("invalid conversion from from \"%v\" (string) to float", val)
 		}
 		return res, nil
 	default:
-		return 0, errors.New(fmt.Sprintf("invalid conversion from from \"%v\" to float", val))
+		return 0, fmt.Errorf("invalid conversion from from \"%v\" to float", val)
 	}
 }
 
@@ -211,15 +211,15 @@ func toString(val any) string {
 }
 
 func toBoolean(val any) (bool, error) {
-	switch val.(type) {
+	switch typed := val.(type) {
 	case int:
-		if val.(int) == 1 {
+		if typed == 1 {
 			return true, nil
 		}
-		if val.(int) == 0 {
+		if typed == 0 {
 			return false, nil
 		}
-		return false, errors.New(fmt.Sprintf("invalid conversion from from \"%d\" to boolean", val))
+		return false, fmt.Errorf("invalid conversion from from \"%d\" to boolean", val)
 	case string:
 		term := strings.TrimSpace(strings.ToLower(val.(string)))
 		if term == "true" || term == "1" {
@@ -228,15 +228,15 @@ func toBoolean(val any) (bool, error) {
 		if term == "false" || term == "0" {
 			return false, nil
 		}
-		return false, errors.New(fmt.Sprintf("invalid conversion from from \"%s\" to boolean", val))
+		return false, fmt.Errorf("invalid conversion from from \"%s\" to boolean", val)
 	case bool:
 		return val.(bool), nil
 	default:
-		return false, errors.New(fmt.Sprintf("invalid conversion from from \"%v\" to boolean", val))
+		return false, fmt.Errorf("invalid conversion from from \"%v\" to boolean", val)
 	}
 }
 
-func contextLookup(ctx Context, path string) (string, any) {
+func contextLookup(ctx e.Context, path string) (string, any) {
 	rxPath := regexp.MustCompile(`{([^{}]+)}`)
 	for match := rxPath.FindStringSubmatchIndex(path); len(match) > 0; {
 		_, val := contextLookup(ctx, string(path[match[2]:match[3]]))
@@ -254,7 +254,7 @@ func contextLookup(ctx Context, path string) (string, any) {
 	return path, nil
 }
 
-func evaluate(ctx Context, path string, dt DataType) (string, any, error) {
+func evaluate(ctx e.Context, path string, dt DataType) (string, any, error) {
 	resolvedPath, value := contextLookup(ctx, path)
 
 	if value == nil {
@@ -281,7 +281,7 @@ func evaluate(ctx Context, path string, dt DataType) (string, any, error) {
 	}
 }
 
-func New(addr string, serOpts *SerializeOptions, simOpts *SimplifyOptions) (Evaluable, error) {
+func New(addr string, serOpts *SerializeOptions, simOpts *SimplifyOptions) (e.Evaluable, error) {
 	dt, err := getDataType(addr)
 	if err != nil {
 		return nil, err

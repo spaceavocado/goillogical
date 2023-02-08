@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	. "github.com/spaceavocado/goillogical/evaluable"
+	e "github.com/spaceavocado/goillogical/evaluable"
 )
 
 type SerializeOptions struct {
@@ -20,15 +20,11 @@ func DefaultSerializeOptions() SerializeOptions {
 }
 
 type collection struct {
-	items []Evaluable
+	items []e.Evaluable
 	opts  *SerializeOptions
 }
 
-func (c collection) Kind() Kind {
-	return Collection
-}
-
-func (c collection) Evaluate(ctx Context) (any, error) {
+func (c collection) Evaluate(ctx e.Context) (any, error) {
 	res := make([]any, len(c.items))
 	for i, item := range c.items {
 		val, err := item.Evaluate((ctx))
@@ -53,7 +49,7 @@ func (c collection) Serialize() any {
 	return res
 }
 
-func (c collection) Simplify(ctx Context) (any, Evaluable) {
+func (c collection) Simplify(ctx e.Context) (any, e.Evaluable) {
 	res := []any{}
 	for _, i := range c.items {
 		val, e := i.Simplify(ctx)
@@ -83,9 +79,9 @@ func shouldBeEscaped(input any, opts *SerializeOptions) bool {
 		return false
 	}
 
-	switch input.(type) {
+	switch typed := input.(type) {
 	case string:
-		_, ok := opts.EscapedOperators[input.(string)]
+		_, ok := opts.EscapedOperators[typed]
 		return ok
 	default:
 		return false
@@ -96,7 +92,7 @@ func escapeOperator(input string, opts *SerializeOptions) string {
 	return fmt.Sprintf("%s%s", opts.EscapeCharacter, input)
 }
 
-func New(items []Evaluable, opts *SerializeOptions) (Evaluable, error) {
+func New(items []e.Evaluable, opts *SerializeOptions) (e.Evaluable, error) {
 	if len(items) == 0 {
 		return nil, errors.New("collection operand must have at least 1 item")
 	}

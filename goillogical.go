@@ -1,7 +1,7 @@
 package goillogical
 
 import (
-	. "github.com/spaceavocado/goillogical/evaluable"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/operand/collection"
 	r "github.com/spaceavocado/goillogical/internal/operand/reference"
 	o "github.com/spaceavocado/goillogical/internal/options"
@@ -15,10 +15,10 @@ type CollectionSerializeOptions = struct {
 }
 
 type Goillogical interface {
-	Evaluate(any, Context) (any, error)
-	Parse(any) (Evaluable, error)
+	Evaluate(any, e.Context) (any, error)
+	Parse(any) (e.Evaluable, error)
 	Statement(any) (string, error)
-	Simplify(any, Context) (any, Evaluable, error)
+	Simplify(any, e.Context) (any, e.Evaluable, error)
 }
 
 type illogical struct {
@@ -26,15 +26,15 @@ type illogical struct {
 	parser p.Parser
 }
 
-func (i illogical) Evaluate(exp any, ctx Context) (any, error) {
-	e, err := i.parser.Parse(exp)
+func (i illogical) Evaluate(exp any, ctx e.Context) (any, error) {
+	eval, err := i.parser.Parse(exp)
 	if err != nil {
 		return nil, err
 	}
-	return e.Evaluate(FlattenContext(ctx))
+	return eval.Evaluate(e.FlattenContext(ctx))
 }
 
-func (i illogical) Parse(exp any) (Evaluable, error) {
+func (i illogical) Parse(exp any) (e.Evaluable, error) {
 	return i.parser.Parse(exp)
 }
 
@@ -46,7 +46,7 @@ func (i illogical) Statement(exp any) (string, error) {
 	return e.String(), nil
 }
 
-func (i illogical) Simplify(exp any, ctx Context) (any, Evaluable, error) {
+func (i illogical) Simplify(exp any, ctx e.Context) (any, e.Evaluable, error) {
 	e, err := i.parser.Parse(exp)
 	if err != nil {
 		return nil, nil, err
@@ -79,7 +79,7 @@ func WithReferenceSimplifyOptions(o SimplifyOptions) Option {
 	}
 }
 
-func WithOperatorMappingOptions(m OperatorMapping) Option {
+func WithOperatorMappingOptions(m e.OperatorMapping) Option {
 	return func(i *illogical) {
 		i.opts.OperatorMapping = m
 	}

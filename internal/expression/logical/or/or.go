@@ -3,29 +3,29 @@ package or
 import (
 	"errors"
 
-	. "github.com/spaceavocado/goillogical/evaluable"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	l "github.com/spaceavocado/goillogical/internal/expression/logical"
 )
 
-func handler(ctx Context, operands []Evaluable) (bool, error) {
+func handler(ctx e.Context, operands []e.Evaluable) (bool, error) {
 	for _, o := range operands {
 		res, err := l.Evaluate(ctx, o)
 		if err != nil {
 			return false, err
 		}
-		if res == true {
+		if res {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluable) {
-	simplified := []Evaluable{}
+func simplify(operator string, ctx e.Context, operands []e.Evaluable) (any, e.Evaluable) {
+	simplified := []e.Evaluable{}
 	for _, o := range operands {
 		res, e := o.Simplify(ctx)
 		if b, ok := res.(bool); ok {
-			if b == true {
+			if b {
 				return true, nil
 			}
 			continue
@@ -46,12 +46,12 @@ func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluabl
 	return nil, e
 }
 
-func New(operator string, operands []Evaluable, notOp string, norOp string) (Evaluable, error) {
+func New(operator string, operands []e.Evaluable, notOp string, norOp string) (e.Evaluable, error) {
 	if len(operands) < 2 {
 		return nil, errors.New("logical OR expression must have at least 2 operands")
 	}
 
-	return l.New(operator, "OR", operands, handler, func(operator string, ctx map[string]any, operands []Evaluable) (any, Evaluable) {
+	return l.New(operator, "OR", operands, handler, func(operator string, ctx map[string]any, operands []e.Evaluable) (any, e.Evaluable) {
 		return simplify(operator, ctx, operands)
 	})
 }

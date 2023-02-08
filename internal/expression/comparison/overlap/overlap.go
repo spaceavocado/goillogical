@@ -3,7 +3,7 @@ package overlap
 import (
 	"reflect"
 
-	. "github.com/spaceavocado/goillogical/evaluable"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
@@ -31,6 +31,6 @@ func handler(evaluated []any) bool {
 	return false
 }
 
-func New(operator string, left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New(operator, "<overlaps>", []Evaluable{left, right}, handler)
+func New(operator string, left e.Evaluable, right e.Evaluable) (e.Evaluable, error) {
+	return c.New(operator, "<overlaps>", []e.Evaluable{left, right}, handler)
 }
