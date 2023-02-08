@@ -70,6 +70,7 @@ go get -u github.com/spaceavocado/goillogical@latest
       - [Ignored Paths](#ignored-paths)
       - [Ignored Paths RegEx](#ignored-paths-regex)
     - [Operator Mapping](#operator-mapping)
+    - [Multiple Options](#multiple-options)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -770,9 +771,9 @@ Mapping of the operators. The key is unique operator key, and the value is the k
 **Usage**
 
 ```go
-referenceSimplifyOption := illogical.WithOperatorMappingOptions(illogical.OperatorMapping {})
+operatorMapping := illogical.WithOperatorMappingOptions(illogical.OperatorMapping {})
 
-i := illogical.New(referenceSimplifyOption)
+i := illogical.New(operatorMapping)
 ```
 
 **Default operator mapping:**
@@ -800,6 +801,27 @@ m := illogical.OperatorMapping{
   Xor, "XOR",
   Not, "NOT",
 }
+```
+
+**The mapping keys are found in:**
+```go
+import (
+	. "github.com/spaceavocado/goillogical/evaluable
+)
+```
+
+### Multiple Options
+All options could be used simultaneously.
+
+```go
+operatorMapping := illogical.WithOperatorMappingOptions(illogical.OperatorMapping {})
+
+collectionSimplifyOption := illogical.WithReferenceSimplifyOptions(illogical.SimplifyOptions {
+	IgnoredPaths   []string
+	IgnoredPathsRx []regexp.Regexp
+})
+
+i := illogical.New(operatorMapping, collectionSimplifyOption)
 ```
 
 ---
