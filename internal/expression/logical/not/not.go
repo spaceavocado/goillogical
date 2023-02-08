@@ -3,24 +3,24 @@ package not
 import (
 	"errors"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	l "github.com/spaceavocado/goillogical/internal/expression/logical"
 )
 
-func handler(ctx Context, operands []Evaluable) (bool, error) {
+func handler(ctx e.Context, operands []e.Evaluable) (bool, error) {
 	res, err := operands[0].Evaluate(ctx)
 	if err != nil {
 		return false, err
 	}
-	switch res.(type) {
+	switch b := res.(type) {
 	case bool:
-		return !res.(bool), nil
+		return !b, nil
 	default:
 		return false, errors.New("logical NOT expression's operand must be evaluated to boolean value")
 	}
 }
 
-func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluable) {
+func simplify(operator string, ctx e.Context, operands []e.Evaluable) (any, e.Evaluable) {
 	res, e := operands[0].Simplify(ctx)
 	if b, ok := res.(bool); ok {
 		return !b, nil
@@ -34,6 +34,6 @@ func simplify(operator string, ctx Context, operands []Evaluable) (any, Evaluabl
 	return nil, nil
 }
 
-func New(operator string, operand Evaluable) (Evaluable, error) {
-	return l.New(operator, "NOT", []Evaluable{operand}, handler, simplify)
+func New(operator string, operand e.Evaluable) (e.Evaluable, error) {
+	return l.New(operator, "NOT", []e.Evaluable{operand}, handler, simplify)
 }

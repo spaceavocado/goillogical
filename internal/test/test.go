@@ -3,11 +3,11 @@ package test
 import (
 	"encoding/json"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 )
 
 func Fprint(input any) string {
-	v, ok := input.(Evaluable)
+	v, ok := input.(e.Evaluable)
 	if ok {
 		return v.String()
 	}

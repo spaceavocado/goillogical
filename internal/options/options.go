@@ -3,7 +3,7 @@ package options
 import (
 	"regexp"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/operand/collection"
 	r "github.com/spaceavocado/goillogical/internal/operand/reference"
 )
@@ -16,29 +16,29 @@ type Options struct {
 	Simplify struct {
 		Reference r.SimplifyOptions
 	}
-	OperatorMapping OperatorMapping
+	OperatorMapping e.OperatorMapping
 }
 
-func DefaultOperatorMapping() OperatorMapping {
-	return map[Kind]string{
-		And:     "AND",
-		Or:      "OR",
-		Nor:     "NOR",
-		Xor:     "XOR",
-		Not:     "NOT",
-		Eq:      "==",
-		Ne:      "!=",
-		Gt:      ">",
-		Ge:      ">=",
-		Lt:      "<",
-		Le:      "<=",
-		Nil:     "NIL",
-		Present: "PRESENT",
-		In:      "IN",
-		Nin:     "NON IT",
-		Overlap: "OVERLAP",
-		Prefix:  "PREFIX",
-		Suffix:  "SUFFIX",
+func DefaultOperatorMapping() e.OperatorMapping {
+	return map[e.Kind]string{
+		e.And:     "AND",
+		e.Or:      "OR",
+		e.Nor:     "NOR",
+		e.Xor:     "XOR",
+		e.Not:     "NOT",
+		e.Eq:      "==",
+		e.Ne:      "!=",
+		e.Gt:      ">",
+		e.Ge:      ">=",
+		e.Lt:      "<",
+		e.Le:      "<=",
+		e.Nil:     "NIL",
+		e.Present: "PRESENT",
+		e.In:      "IN",
+		e.Nin:     "NOT IN",
+		e.Overlap: "OVERLAP",
+		e.Prefix:  "PREFIX",
+		e.Suffix:  "SUFFIX",
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
 	. "github.com/spaceavocado/goillogical/internal/mock"
 	. "github.com/spaceavocado/goillogical/internal/test"

@@ -1,7 +1,7 @@
 package value
 
 import (
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 
 	"errors"
 	"fmt"
@@ -11,7 +11,7 @@ type value struct {
 	val any
 }
 
-func (v value) Evaluate(ctx Context) (any, error) {
+func (v value) Evaluate(ctx e.Context) (any, error) {
 	return v.val, nil
 }
 
@@ -19,7 +19,7 @@ func (v value) Serialize() any {
 	return v.val
 }
 
-func (v value) Simplify(Context) (any, Evaluable) {
+func (v value) Simplify(e.Context) (any, e.Evaluable) {
 	return v.val, nil
 }
 
@@ -41,7 +41,7 @@ func isPrimitive(v any) bool {
 	}
 }
 
-func New(val any) (Evaluable, error) {
+func New(val any) (e.Evaluable, error) {
 	if !isPrimitive(val) {
 		return nil, errors.New("value could be only primitive type, string, number or bool")
 	}

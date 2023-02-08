@@ -1,7 +1,7 @@
 package gt
 
 import (
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
@@ -10,22 +10,22 @@ func op[T c.Number](a T, b T) bool {
 }
 
 func right[T c.Number](a T, b any) bool {
-	switch b.(type) {
+	switch typed := b.(type) {
 	case T:
-		return op(a, b.(T))
+		return op(a, typed)
 	default:
 		return false
 	}
 }
 
 func left(a any, b any) bool {
-	switch a.(type) {
+	switch typed := a.(type) {
 	case int:
-		return right(a.(int), b)
+		return right(typed, b)
 	case float32:
-		return right(a.(float32), b)
+		return right(typed, b)
 	case float64:
-		return right(a.(float64), b)
+		return right(typed, b)
 	default:
 		return false
 	}
@@ -35,6 +35,6 @@ func handler(evaluated []any) bool {
 	return left(evaluated[0], evaluated[1])
 }
 
-func New(operator string, left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New(operator, ">", []Evaluable{left, right}, handler)
+func New(operator string, left e.Evaluable, right e.Evaluable) (e.Evaluable, error) {
+	return c.New(operator, ">", []e.Evaluable{left, right}, handler)
 }

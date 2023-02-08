@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 )
 
 type Number interface {
@@ -14,11 +14,11 @@ type Number interface {
 type comparison struct {
 	kind     string
 	operator string
-	operands []Evaluable
+	operands []e.Evaluable
 	handler  func([]any) bool
 }
 
-func (c comparison) Evaluate(ctx Context) (any, error) {
+func (c comparison) Evaluate(ctx e.Context) (any, error) {
 	evaluated := make([]any, len(c.operands))
 	for i, e := range c.operands {
 		val, err := e.Evaluate(ctx)
@@ -38,7 +38,7 @@ func (c comparison) Serialize() any {
 	return res
 }
 
-func (c comparison) Simplify(ctx Context) (any, Evaluable) {
+func (c comparison) Simplify(ctx e.Context) (any, e.Evaluable) {
 	res := []any{}
 	for _, o := range c.operands {
 		val, e := o.Simplify(ctx)
@@ -60,6 +60,13 @@ func (c comparison) String() string {
 }
 
 func IsComparable(left any, right any) bool {
+	if left == nil && right == nil {
+		return true
+	}
+	if left == nil || right == nil {
+		return false
+	}
+
 	t1 := reflect.TypeOf(left).Kind()
 	t2 := reflect.TypeOf(right).Kind()
 	if t1 != t2 {
@@ -71,6 +78,6 @@ func IsComparable(left any, right any) bool {
 	return true
 }
 
-func New(kind string, op string, operands []Evaluable, handler func([]any) bool) (Evaluable, error) {
+func New(kind string, op string, operands []e.Evaluable, handler func([]any) bool) (e.Evaluable, error) {
 	return comparison{kind: kind, operator: op, operands: operands, handler: handler}, nil
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
 	ge "github.com/spaceavocado/goillogical/internal/expression/comparison/ge"
 	gt "github.com/spaceavocado/goillogical/internal/expression/comparison/gt"

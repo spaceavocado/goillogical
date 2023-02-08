@@ -1,4 +1,4 @@
-package internal
+package evaluable
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ type Context = map[string]any
 
 type Kind byte
 
+// Evaluable Kind Identifier
 const (
 	Unknown Kind = iota
 	Value
@@ -82,17 +83,14 @@ func FlattenContext(ctx Context) map[string]any {
 			fallthrough
 		case reflect.String:
 			res[path] = val
-			break
 		case reflect.Map:
 			for prop, val := range val.(map[string]any) {
 				lookup(val, joinPath(path, prop))
 			}
-			break
 		case reflect.Slice:
 			for i := 0; i < v.Len(); i++ {
 				lookup(v.Index(i).Interface(), fmt.Sprintf("%s[%d]", path, i))
 			}
-			break
 		default:
 			return
 		}

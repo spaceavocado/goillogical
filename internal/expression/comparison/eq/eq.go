@@ -1,7 +1,7 @@
 package eq
 
 import (
-	. "github.com/spaceavocado/goillogical/internal"
+	e "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 
@@ -12,6 +12,6 @@ func handler(evaluated []any) bool {
 	return evaluated[0] == evaluated[1]
 }
 
-func New(operator string, left Evaluable, right Evaluable) (Evaluable, error) {
-	return c.New(operator, "==", []Evaluable{left, right}, handler)
+func New(operator string, left e.Evaluable, right e.Evaluable) (e.Evaluable, error) {
+	return c.New(operator, "==", []e.Evaluable{left, right}, handler)
 }

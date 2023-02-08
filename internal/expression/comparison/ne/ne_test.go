@@ -3,7 +3,7 @@ package ne
 import (
 	"testing"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	. "github.com/spaceavocado/goillogical/internal/mock"
 )
 
