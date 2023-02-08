@@ -35,7 +35,7 @@ func DefaultOperatorMapping() OperatorMapping {
 		Nil:     "NIL",
 		Present: "PRESENT",
 		In:      "IN",
-		Nin:     "NON IT",
+		Nin:     "NOT IN",
 		Overlap: "OVERLAP",
 		Prefix:  "PREFIX",
 		Suffix:  "SUFFIX",
