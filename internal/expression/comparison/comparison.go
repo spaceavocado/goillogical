@@ -60,6 +60,13 @@ func (c comparison) String() string {
 }
 
 func IsComparable(left any, right any) bool {
+	if left == nil && right == nil {
+		return true
+	}
+	if left == nil || right == nil {
+		return false
+	}
+
 	t1 := reflect.TypeOf(left).Kind()
 	t2 := reflect.TypeOf(right).Kind()
 	if t1 != t2 {
