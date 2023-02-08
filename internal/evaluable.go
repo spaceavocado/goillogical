@@ -9,6 +9,7 @@ type Context = map[string]any
 
 type Kind byte
 
+// Evaluable Kind Identifier
 const (
 	Unknown Kind = iota
 	Value
