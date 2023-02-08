@@ -670,12 +670,12 @@ i.Evaluate([]any{"NOT", []any{"==", 5, 5}}, ctx) // true
 **Usage**
 
 ```go
-referenceSimplifyOption := illogical.WithReferenceSimplifyOptions(illogical.ReferenceSerializeOptions {
+referenceSerializeOptions := illogical.WithReferenceSerializeOptions(illogical.ReferenceSerializeOptions{
   From: func(string) (string, error)
 	To:   func(string) string
 })
 
-i := illogical.New(referenceSimplifyOption)
+i := illogical.New(referenceSerializeOptions)
 ```
 
 #### From
@@ -711,11 +711,11 @@ func(string) string
 **Usage**
 
 ```go
-collectionSimplifyOption := illogical.WithReferenceSimplifyOptions(illogical.CollectionSerializeOptions {
+collectionSerializeOptions := illogical.WithCollectionSerializeOptions(illogical.CollectionSerializeOptions{
 	EscapeCharacter  string
 })
 
-i := illogical.New(collectionSimplifyOption)
+i := illogical.New(collectionSerializeOptions)
 ```
 
 #### Escape Character
@@ -740,12 +740,12 @@ Options applied while an expression is being simplified.
 **Usage**
 
 ```go
-collectionSimplifyOption := illogical.WithReferenceSimplifyOptions(illogical.SimplifyOptions {
+referenceSimplifyOptions := illogical.WithReferenceSimplifyOptions(illogical.SimplifyOptions{
 	IgnoredPaths   []string
 	IgnoredPathsRx []regexp.Regexp
 })
 
-i := illogical.New(collectionSimplifyOption)
+i := illogical.New(referenceSimplifyOptions)
 ```
 
 #### Ignored Paths
@@ -771,7 +771,11 @@ Mapping of the operators. The key is unique operator key, and the value is the k
 **Usage**
 
 ```go
-operatorMapping := illogical.WithOperatorMappingOptions(illogical.OperatorMapping {})
+import (
+	e "github.com/spaceavocado/goillogical/evaluable"
+)
+
+operatorMapping := illogical.WithOperatorMappingOptions(map[e.Kind]string{})
 
 i := illogical.New(operatorMapping)
 ```
@@ -779,49 +783,42 @@ i := illogical.New(operatorMapping)
 **Default operator mapping:**
 
 ```go
-m := illogical.OperatorMapping{
+operatorMapping := e.OperatorMapping{
   // Comparison
-  Eq, "==",
-  Ne, "!=",
-  Gt, ">",
-  Ge, ">=",
-  Lt, "<",
-  Le, "<=",
-  In, "IN",
-  Nin, "NOT IN",
-  Prefix, "PREFIX",
-  Suffix, "SUFFIX",
-  Overlap, "OVERLAP",
-  Nil, "NIL",
-  Present, "PRESENT",
+  e.Eq: "==",
+  e.Ne: "!=",
+  e.Gt: ">",
+  e.Ge: ">=",
+  e.Lt: "<",
+  e.Le: "<=",
+  e.In: "IN",
+  e.Nin: "NOT IN",
+  e.Prefix: "PREFIX",
+  e.Suffix: "SUFFIX",
+  e.Overlap:, "OVERLAP",
+  e.Nil: "NIL",
+  e.Present: "PRESENT",
   // Logical
-  And, "AND",
-  Or, "OR",
-  Nor, "NOR",
-  Xor, "XOR",
-  Not, "NOT",
+  e.And: "AND",
+  e.Or: "OR",
+  e.Nor: "NOR",
+  e.Xor: "XOR",
+  e.Not: "NOT",
 }
-```
-
-**The mapping keys are found in:**
-```go
-import (
-	. "github.com/spaceavocado/goillogical/evaluable
-)
 ```
 
 ### Multiple Options
 All options could be used simultaneously.
 
 ```go
-operatorMapping := illogical.WithOperatorMappingOptions(illogical.OperatorMapping {})
+operatorMapping := illogical.WithOperatorMappingOptions(map[e.Kind]string{})
 
-collectionSimplifyOption := illogical.WithReferenceSimplifyOptions(illogical.SimplifyOptions {
-	IgnoredPaths   []string
-	IgnoredPathsRx []regexp.Regexp
+referenceSimplifyOptions := illogical.WithReferenceSimplifyOptions(illogical.SimplifyOptions{
+  IgnoredPaths:   []string{},
+  IgnoredPathsRx: []regexp.Regexp{},
 })
 
-i := illogical.New(operatorMapping, collectionSimplifyOption)
+i := illogical.New(operatorMapping, referenceSimplifyOptions)
 ```
 
 ---
