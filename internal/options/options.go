@@ -3,7 +3,7 @@ package options
 import (
 	"regexp"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/operand/collection"
 	r "github.com/spaceavocado/goillogical/internal/operand/reference"
 )

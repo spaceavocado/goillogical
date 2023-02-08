@@ -3,7 +3,7 @@ package logical
 import (
 	"testing"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	. "github.com/spaceavocado/goillogical/internal/mock"
 	. "github.com/spaceavocado/goillogical/internal/test"
 )

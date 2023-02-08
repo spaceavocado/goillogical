@@ -3,7 +3,7 @@ package logical
 import (
 	"fmt"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 )
 
 type Handler func(Context, []Evaluable) (bool, error)

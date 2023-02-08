@@ -3,7 +3,7 @@ package and
 import (
 	"errors"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	l "github.com/spaceavocado/goillogical/internal/expression/logical"
 )
 

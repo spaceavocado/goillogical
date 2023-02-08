@@ -12,7 +12,7 @@ This project has been developed to provide Go(lang) implementation of [spaceavoc
 ## Getting Started
 
 ```sh
-go get -u github.com/spaceavocado/goillogical
+go get -u github.com/spaceavocado/goillogical@latest
 ```
 
 **Table of Content**
@@ -80,7 +80,7 @@ go get -u github.com/spaceavocado/goillogical
 
 ```go
 import (
-	illogical "github.com/spaceavocado/goillogical"
+	illogical "github.com/spaceavocado/goillogical
 )
 
 // Create a new instance of the engine

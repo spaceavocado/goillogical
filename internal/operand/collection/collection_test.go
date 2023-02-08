@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
 	reference "github.com/spaceavocado/goillogical/internal/operand/reference"
 	value "github.com/spaceavocado/goillogical/internal/operand/value"

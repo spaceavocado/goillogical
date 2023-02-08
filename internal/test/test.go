@@ -3,7 +3,7 @@ package test
 import (
 	"encoding/json"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 )
 
 func Fprint(input any) string {

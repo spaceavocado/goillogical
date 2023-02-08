@@ -3,7 +3,7 @@ package suffix
 import (
 	"strings"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	c "github.com/spaceavocado/goillogical/internal/expression/comparison"
 )
 

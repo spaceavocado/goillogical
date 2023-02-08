@@ -3,7 +3,7 @@ package mock
 import (
 	"regexp"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	collection "github.com/spaceavocado/goillogical/internal/operand/collection"
 	reference "github.com/spaceavocado/goillogical/internal/operand/reference"
 	value "github.com/spaceavocado/goillogical/internal/operand/value"

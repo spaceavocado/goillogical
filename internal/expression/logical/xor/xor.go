@@ -3,7 +3,7 @@ package xor
 import (
 	"errors"
 
-	. "github.com/spaceavocado/goillogical/internal"
+	. "github.com/spaceavocado/goillogical/evaluable"
 	l "github.com/spaceavocado/goillogical/internal/expression/logical"
 	nor "github.com/spaceavocado/goillogical/internal/expression/logical/nor"
 	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
