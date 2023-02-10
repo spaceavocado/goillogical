@@ -4,6 +4,11 @@ A micro conditional javascript engine used to parse the raw logical and comparis
 
 > Revision: Feb 7, 2023.
 
+<p align="center">
+<a href="https://goreportcard.com/report/github.com/spaceavocado/goillogical"><img class="badge" tag="https://github.com/spaceavocado/goillogical" src="https://goreportcard.com/badge/github.com/spaceavocado/goillogical"></a>
+<a href="https://godoc.org/github.com/spaceavocado/goillogical"><img alt="Go Doc" src="https://godoc.org/github.com/spaceavocado/goillogical?status.svg"></a>
+</p>
+
 ## About
 
 This project has been developed to provide Go(lang) implementation of [spaceavocado/illogical](https://github.com/spaceavocado/illogical).
