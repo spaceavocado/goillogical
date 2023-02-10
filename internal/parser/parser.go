@@ -111,10 +111,6 @@ func toReferenceAddr(input any, opts *reference.SerializeOptions) (string, error
 }
 
 func createOperand(input any, opts *options) (e.Evaluable, error) {
-	if input == nil {
-		return nil, errors.New("invalid undefined operand")
-	}
-
 	t := reflect.TypeOf(input).Kind()
 	if t == reflect.Slice {
 		v := reflect.ValueOf(input)

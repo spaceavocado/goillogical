@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"errors"
 	"regexp"
 	"testing"
 
@@ -49,9 +50,36 @@ func TestEvaluate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		e, _ := New(test.input, &opts)
-		if output, err := e.Evaluate(ctx); Fprint(output) != Fprint(test.expected) || err != nil {
+		eval, _ := New(test.input, &opts)
+		if output, err := eval.Evaluate(ctx); Fprint(output) != Fprint(test.expected) || err != nil {
 			t.Errorf("input (%v): expected %v, got %v", test.input, output, err)
+		}
+	}
+
+	errs := []struct {
+		input    []Evaluable
+		expected error
+	}{
+		{[]Evaluable{ref("RefA.(Float)")}, errors.New("invalid conversion from from \"A\" (string) to float")},
+	}
+
+	for _, test := range errs {
+		eval, _ := New(test.input, &opts)
+		if _, err := eval.Evaluate(ctx); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+
+	errs = []struct {
+		input    []Evaluable
+		expected error
+	}{
+		{[]Evaluable{}, errors.New("collection operand must have at least 1 item")},
+	}
+
+	for _, test := range errs {
+		if _, err := New(test.input, &opts); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
 		}
 	}
 }

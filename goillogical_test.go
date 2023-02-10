@@ -4,10 +4,14 @@ import (
 	"errors"
 	"testing"
 
+	"regexp"
+
 	. "github.com/spaceavocado/goillogical/evaluable"
 	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
 	and "github.com/spaceavocado/goillogical/internal/expression/logical/and"
 	. "github.com/spaceavocado/goillogical/internal/mock"
+	r "github.com/spaceavocado/goillogical/internal/operand/reference"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestEvaluate(t *testing.T) {
@@ -129,6 +133,61 @@ func TestStatement(t *testing.T) {
 	}
 }
 
+func TestSimplify(t *testing.T) {
+	opts := r.DefaultSerializeOptions()
+	serOpts := r.DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{"ignored"},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
+	illogical := New(WithReferenceSerializeOptions(opts), WithReferenceSimplifyOptions(simOpts))
+
+	ref := func(val string) Evaluable {
+		e, _ := r.New(val, &serOpts, &simOpts)
+		return e
+	}
+
+	ctx := map[string]any{
+		"refA": 1,
+		"refB": map[string]any{
+			"refB1": 2,
+		},
+		"refC": "refB1",
+	}
+
+	var tests = []struct {
+		input any
+		value any
+		eval  any
+	}{
+		{"$refJ", nil, ref("refJ")},
+		{"$ignored", nil, nil},
+		{"$refA", 1, nil},
+		{"$refB.refB1", 2, nil},
+		{"$refC.{refJ}", nil, ref("refC.{refJ}")},
+		{[]any{"==", 1, 1}, true, nil},
+	}
+
+	for _, test := range tests {
+		if value, eval, err := illogical.Simplify(test.input, ctx); value != test.value || Fprint(eval) != Fprint(test.eval) || err != nil {
+			t.Errorf("input (%v): expected %v/%v, got %v/%v/%v", test.input, test.value, test.eval, value, eval, err)
+		}
+	}
+
+	var errs = []struct {
+		input    any
+		expected error
+	}{
+		{nil, errors.New("unexpected input")},
+	}
+
+	for _, test := range errs {
+		if _, _, err := illogical.Simplify(test.input, ctx); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+}
+
 func TestWithOperatorMappingOptions(t *testing.T) {
 	illogical := New(WithOperatorMappingOptions(map[Kind]string{Eq: "IS"}))
 	ctx := map[string]any{
@@ -160,6 +219,30 @@ func TestWithOperatorMappingOptions(t *testing.T) {
 	for _, test := range tests2 {
 		if output, err := illogical.Statement(test.input); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v/%v", test.input, test.expected, output, err)
+		}
+	}
+}
+
+func TestSerialize(t *testing.T) {
+	opts := CollectionSerializeOptions{
+		EscapeCharacter: "*",
+	}
+	illogical := New(WithCollectionSerializeOptions(opts))
+
+	var tests = []struct {
+		input  any
+		output any
+	}{
+		{1, 1},
+		{"$refJ", "$refJ"},
+		{[]any{"*==", 1, 1}, []any{"*==", 1, 1}},
+		{[]any{"==", 1, 1}, []any{"==", 1, 1}},
+	}
+
+	for _, test := range tests {
+		eval, _ := illogical.Parse(test.input)
+		if output := eval.Serialize(); Fprint(output) != Fprint(test.output) {
+			t.Errorf("input (%v): expected %v, got %v", test.input, output, eval)
 		}
 	}
 }

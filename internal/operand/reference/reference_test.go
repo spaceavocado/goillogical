@@ -20,6 +20,73 @@ func ref(val string) Evaluable {
 	return e
 }
 
+func TestNew(t *testing.T) {
+	serOpts := DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
+
+	errs := []struct {
+		input    string
+		expected error
+	}{
+		{"ref.(Invalid)", errors.New("unsupported \"Invalid\" type casting")},
+	}
+
+	for _, test := range errs {
+
+		if _, err := New(test.input, &serOpts, &simOpts); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+}
+
+func TestDefaultSerializeOptions(t *testing.T) {
+	opts := DefaultSerializeOptions()
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"$ref", "ref"},
+	}
+
+	for _, test := range tests {
+		if output, _ := opts.From(test.input); output != test.expected {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, output)
+		}
+	}
+
+	errs := []struct {
+		input    string
+		expected error
+	}{
+		{"", errors.New("invalid operand")},
+		{"$", errors.New("invalid operand")},
+		{"r$ef", errors.New("invalid operand")},
+	}
+
+	for _, test := range errs {
+		if _, err := opts.From(test.input); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+
+	tests = []struct {
+		input    string
+		expected string
+	}{
+		{"ref", "$ref"},
+	}
+
+	for _, test := range tests {
+		if output := opts.To(test.input); output != test.expected {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, output)
+		}
+	}
+}
+
 func TestGetDataType(t *testing.T) {
 	var tests = []struct {
 		input    string
@@ -104,6 +171,7 @@ func TestToInteger(t *testing.T) {
 	}{
 		{1, 1},
 		{1.1, 1},
+		{float32(1.1), 1},
 		{"1", 1},
 		{"1.1", 1},
 		{"1.9", 1},
@@ -209,6 +277,7 @@ func TestToString(t *testing.T) {
 		expected string
 	}{
 		{1, "1"},
+		{1.1, "1.100000"},
 		{"1", "1"},
 		{true, "true"},
 	}
@@ -286,11 +355,12 @@ func TestEvaluate(t *testing.T) {
 		dt    DataType
 		value any
 	}{
-		{"refA", Undefined, 1},
+		{"refA", Integer, 1},
 		{"refA", String, "1"},
 		{"refG", Number, 1},
-		{"refH", Number, 1.1},
+		{"refH", Float, 1.1},
 		{"refB.refB3", String, "true"},
+		{"refB.refB3", Boolean, true},
 		{"refB.refB3", Number, 1},
 		{"refJ", Undefined, nil},
 	}
@@ -298,6 +368,24 @@ func TestEvaluate(t *testing.T) {
 	for _, test := range tests {
 		if _, value, err := evaluate(ctx, test.path, test.dt); value != test.value || err != nil {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.path, test.dt, test.value, value)
+		}
+	}
+
+	serOpts := DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
+	tests2 := []struct {
+		addr   string
+		output any
+	}{
+		{"refA", 1},
+	}
+	for _, test := range tests2 {
+		eval, _ := New(test.addr, &serOpts, &simOpts)
+		if output, err := eval.Evaluate(ctx); output != test.output || err != nil {
+			t.Errorf("input (%v): expected %v, got %v", test.addr, test.output, output)
 		}
 	}
 }

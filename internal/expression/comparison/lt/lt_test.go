@@ -18,11 +18,12 @@ func TestHandler(t *testing.T) {
 		{Val(1.1), Val(1.2), true},
 		// Falsy
 		{Val(1), Val(1), false},
-		{Val(1.1), Val(1.1), false},
+		{Val(float32(1.1)), Val(float32(1.1)), false},
 		{Val(1), Val(0), false},
 		{Val(1.1), Val(1.0), false},
 		// Non comparable
 		{Val(1.1), Val(1), false},
+		{Val("val"), Val(1), false},
 	}
 
 	for _, test := range tests {

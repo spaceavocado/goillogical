@@ -31,11 +31,10 @@ func TestHandler(t *testing.T) {
 		}
 	}
 
-	var errs = []struct {
+	errs := []struct {
 		operands []Evaluable
 		expected error
 	}{
-		// Truthy
 		{[]Evaluable{}, errors.New("logical NOR expression must have at least 2 operands")},
 		{[]Evaluable{Val(true)}, errors.New("logical NOR expression must have at least 2 operands")},
 	}
@@ -43,6 +42,20 @@ func TestHandler(t *testing.T) {
 	for _, test := range errs {
 
 		if _, err := New("NOR", test.operands, "NOT", "NOR"); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.operands, test.expected, err)
+		}
+	}
+
+	errs = []struct {
+		operands []Evaluable
+		expected error
+	}{
+		{[]Evaluable{Val(false), Invalid()}, errors.New("invalid")},
+	}
+
+	for _, test := range errs {
+		c, _ := New("NOR", test.operands, "NOT", "NOR")
+		if _, err := c.Evaluate(map[string]any{}); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.operands, test.expected, err)
 		}
 	}
