@@ -92,3 +92,26 @@ func TestString(t *testing.T) {
 		}
 	}
 }
+
+func TestIsComparable(t *testing.T) {
+	var tests = []struct {
+		a        any
+		b        any
+		expected bool
+	}{
+		{nil, nil, true},
+		{nil, 1, false},
+		{1, nil, false},
+		{1, 1, true},
+		{1, 1.2, false},
+		{[]any{1}, 1, false},
+		{1, []any{1}, false},
+		{[]any{1}, []any{1}, false},
+	}
+
+	for _, test := range tests {
+		if output := IsComparable(test.a, test.b); output != test.expected {
+			t.Errorf("input (%v, %v): expected %v, got %v", test.a, test.b, test.expected, output)
+		}
+	}
+}
