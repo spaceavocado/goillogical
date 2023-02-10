@@ -2,12 +2,17 @@ package goillogical
 
 import (
 	"errors"
+	"fmt"
 	"testing"
+
+	"regexp"
 
 	. "github.com/spaceavocado/goillogical/evaluable"
 	eq "github.com/spaceavocado/goillogical/internal/expression/comparison/eq"
 	and "github.com/spaceavocado/goillogical/internal/expression/logical/and"
 	. "github.com/spaceavocado/goillogical/internal/mock"
+	r "github.com/spaceavocado/goillogical/internal/operand/reference"
+	. "github.com/spaceavocado/goillogical/internal/test"
 )
 
 func TestEvaluate(t *testing.T) {
@@ -125,6 +130,49 @@ func TestStatement(t *testing.T) {
 	for _, test := range errs {
 		if _, err := illogical.Statement(test.input); err.Error() != test.expected.Error() {
 			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
+		}
+	}
+}
+
+func TestSimplify(t *testing.T) {
+	opts := r.DefaultSerializeOptions()
+	serOpts := r.DefaultSerializeOptions()
+	simOpts := SimplifyOptions{
+		IgnoredPaths:   []string{"ignored"},
+		IgnoredPathsRx: []regexp.Regexp{},
+	}
+	illogical := New(WithReferenceSerializeOptions(opts), WithReferenceSimplifyOptions(simOpts))
+
+	ref := func(val string) Evaluable {
+		e, _ := r.New(val, &serOpts, &simOpts)
+		return e
+	}
+
+	ctx := map[string]any{
+		"refA": 1,
+		"refB": map[string]any{
+			"refB1": 2,
+		},
+		"refC": "refB1",
+	}
+
+	var tests = []struct {
+		input any
+		value any
+		eval  any
+	}{
+		{"$refJ", nil, ref("refJ")},
+		{"$ignored", nil, nil},
+		{"$refA", 1, nil},
+		{"$refB.refB1", 2, nil},
+		{"$refC.{refJ}", nil, ref("refC.{refJ}")},
+		{[]any{"==", 1, 1}, true, nil},
+	}
+
+	for _, test := range tests {
+		if value, eval, err := illogical.Simplify(test.input, ctx); value != test.value || Fprint(eval) != Fprint(test.eval) || err != nil {
+			fmt.Println(value, eval, err)
+			t.Errorf("input (%v): expected %v/%v, got %v/%v/%v", test.input, test.value, test.eval, value, eval, err)
 		}
 	}
 }
