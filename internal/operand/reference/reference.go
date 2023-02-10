@@ -12,12 +12,20 @@ import (
 )
 
 type SerializeOptions struct {
+	// A function used to determine if the operand is a reference type, otherwise evaluated as a static value.
+	//
+	// - `true` = reference type
+	// - `false` = value type
 	From func(string) (string, error)
-	To   func(string) string
+	// A function used to transform the operand into the reference annotation stripped form. I.e. remove any
+	// annotation used to detect the reference type. E.g. "$Reference" => "Reference".
+	To func(string) string
 }
 
 type SimplifyOptions struct {
-	IgnoredPaths   []string
+	// Reference paths which should be ignored while simplification is applied. Must be an exact match.
+	IgnoredPaths []string
+	// Reference paths which should be ignored while simplification is applied. Matching regular expression patterns.
 	IgnoredPathsRx []regexp.Regexp
 }
 

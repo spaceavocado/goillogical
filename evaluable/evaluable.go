@@ -1,3 +1,6 @@
+// Evaluable is defined in this package as the core data structure representing
+// an evaluable expression. In addition this package contains additional utils
+// to work with evaluation context.
 package evaluable
 
 import (
@@ -5,11 +8,39 @@ import (
 	"reflect"
 )
 
+// Evaluation data context is used to provide the expression with variable references,
+// i.e. this allows for the dynamic expressions. The data context is object with
+// properties used as the references keys, and its values as reference values.
+//
+// Expected value types object, string, number, [] boolean | string | number and
+// nested struct of type Context.
+//
+// Example:
+//
+//	ctx := Context{
+//		"name":    "peter",
+//		"country": "canada",
+//		"age":     21,
+//		"options": []int{1, 2, 3},
+//		"address": struct {
+//			city    string
+//			country string
+//		}{
+//			city:    "Toronto",
+//			country: "Canada",
+//		},
+//		"index":     2,
+//		"segment":   "city",
+//		"shapeA":    "box",
+//		"shapeB":    "circle",
+//		"shapeType": "B",
+//	}
 type Context = map[string]any
 
+// Evaluation expression kind.
 type Kind byte
 
-// Evaluable Kind Identifier
+// Evaluable Kind Identifier, i.e. an unique symbol representing an expression.
 const (
 	Unknown Kind = iota
 	Value
@@ -35,15 +66,28 @@ const (
 	Suffix
 )
 
+// Operator mapping represents a map between an expression kind (symbol) and the actual
+// text literal denoting an expression.
+//
+// Example:
+// ["==", 1, 1] to be mapped as EQ expression would be represented as:
+//
+// map[Kind]string{ Eq: "==" }
 type OperatorMapping = map[Kind]string
 
+// Evaluable is self-evaluable expression, allowing to serialize and simplify itself.
 type Evaluable interface {
+	// Evaluate given raw expression in the given context.
 	Evaluate(Context) (any, error)
+	// Serialized the evaluable into raw data form, i.e. parse-able expression.
 	Serialize() any
+	// Simplify the evaluable with a given context into an reduced Evaluable or evaluated value.
 	Simplify(Context) (any, Evaluable)
+	// Get string representation of the Evaluable.
 	String() string
 }
 
+// Is evaluated primitive predicate.
 func IsEvaluatedPrimitive(value any) bool {
 	switch value.(type) {
 	case int, int8, int16, int32, int64:
@@ -59,6 +103,32 @@ func IsEvaluatedPrimitive(value any) bool {
 	}
 }
 
+// Flatten context into a map of map[property path]value.
+//
+// Example:
+//
+//		ctx := Context{
+//			"name":    "peter",
+//			"options": []int{1, 2, 3},
+//			"address": struct {
+//				city    string
+//				country string
+//			}{
+//				city:    "Toronto",
+//				country: "Canada",
+//			},
+//		}
+//
+//	 flattened = FlattenContext(ctx)
+//
+//		flattened := Context{
+//			"name":    "peter",
+//			"options[0]": 1,
+//			"options[1]": 2,
+//			"options[2]": 3,
+//			"address.city": "Toronto",
+//			"address.country": "Canada",
+//		}
 func FlattenContext(ctx Context) map[string]any {
 	res := make(map[string]any)
 	var lookup func(p any, path string)
