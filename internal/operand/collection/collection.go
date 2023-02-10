@@ -97,11 +97,5 @@ func New(items []e.Evaluable, opts *SerializeOptions) (e.Evaluable, error) {
 		return nil, errors.New("collection operand must have at least 1 item")
 	}
 
-	// for _, item := range items {
-	// 	if isCollection(item) {
-	// 		return nil, errors.New("collection cannot contain nested collection")
-	// 	}
-	// }
-
 	return collection{items, opts}, nil
 }

@@ -139,6 +139,7 @@ func TestCollection(t *testing.T) {
 	}{
 		{[]any{1}, Col(Val(1))},
 		{[]any{"val"}, Col(Val("val"))},
+		{[]any{"val1", "val2"}, Col(Val("val1"), Val("val2"))},
 		{[]any{true}, Col(Val(true))},
 		{[]any{addr("ref", opts)}, Col(Ref("ref"))},
 		{[]any{1, "val", true, addr("ref", opts)}, Col(Val(1), Val("val"), Val(true), Ref("ref"))},
@@ -209,12 +210,14 @@ func TestInvalid(t *testing.T) {
 	parser := New(&opts)
 
 	var tests = []struct {
-		input    []any
+		input    any
 		expected error
 	}{
-		{nil, errors.New("invalid undefined operand")},
+		{nil, errors.New("unexpected input")},
 		{[]any{}, errors.New("invalid undefined operand")},
 		{[]any{struct{ int }{5}}, errors.New("invalid operand, {5}")},
+		{[]any{"val1", struct{ int }{5}}, errors.New("invalid operand, {5}")},
+		{[]any{"==", struct{ int }{5}}, errors.New("invalid operand, {5}")},
 	}
 
 	for _, test := range tests {

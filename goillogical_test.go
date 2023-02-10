@@ -2,7 +2,6 @@ package goillogical
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"regexp"
@@ -171,8 +170,20 @@ func TestSimplify(t *testing.T) {
 
 	for _, test := range tests {
 		if value, eval, err := illogical.Simplify(test.input, ctx); value != test.value || Fprint(eval) != Fprint(test.eval) || err != nil {
-			fmt.Println(value, eval, err)
 			t.Errorf("input (%v): expected %v/%v, got %v/%v/%v", test.input, test.value, test.eval, value, eval, err)
+		}
+	}
+
+	var errs = []struct {
+		input    any
+		expected error
+	}{
+		{nil, errors.New("unexpected input")},
+	}
+
+	for _, test := range errs {
+		if _, _, err := illogical.Simplify(test.input, ctx); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.input, test.expected, err)
 		}
 	}
 }
@@ -208,6 +219,30 @@ func TestWithOperatorMappingOptions(t *testing.T) {
 	for _, test := range tests2 {
 		if output, err := illogical.Statement(test.input); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v/%v", test.input, test.expected, output, err)
+		}
+	}
+}
+
+func TestSerialize(t *testing.T) {
+	opts := CollectionSerializeOptions{
+		EscapeCharacter: "*",
+	}
+	illogical := New(WithCollectionSerializeOptions(opts))
+
+	var tests = []struct {
+		input  any
+		output any
+	}{
+		{1, 1},
+		{"$refJ", "$refJ"},
+		{[]any{"*==", 1, 1}, []any{"*==", 1, 1}},
+		{[]any{"==", 1, 1}, []any{"==", 1, 1}},
+	}
+
+	for _, test := range tests {
+		eval, _ := illogical.Parse(test.input)
+		if output := eval.Serialize(); Fprint(output) != Fprint(test.output) {
+			t.Errorf("input (%v): expected %v, got %v", test.input, output, eval)
 		}
 	}
 }

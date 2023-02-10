@@ -1,6 +1,7 @@
 package comparison
 
 import (
+	"errors"
 	"testing"
 
 	. "github.com/spaceavocado/goillogical/evaluable"
@@ -9,6 +10,7 @@ import (
 )
 
 func TestEvaluate(t *testing.T) {
+
 	var tests = []struct {
 		op       string
 		operands []Evaluable
@@ -22,6 +24,21 @@ func TestEvaluate(t *testing.T) {
 		c, _ := New("Unknown", test.op, test.operands, func(evaluated []any) bool { return evaluated[0] == evaluated[1] })
 		if output, err := c.Evaluate(map[string]any{}); output != test.expected || err != nil {
 			t.Errorf("input (%v, %v): expected %v, got %v/%v", test.op, test.operands, test.expected, output, err)
+		}
+	}
+
+	errs := []struct {
+		op       string
+		operands []Evaluable
+		expected error
+	}{
+		{"==", []Evaluable{Val(1), Invalid()}, errors.New("invalid")},
+	}
+
+	for _, test := range errs {
+		c, _ := New("Unknown", test.op, test.operands, func(evaluated []any) bool { return evaluated[0] == evaluated[1] })
+		if _, err := c.Evaluate(map[string]any{}); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v, %v): expected %v, got %v", test.op, test.operands, test.expected, err)
 		}
 	}
 }

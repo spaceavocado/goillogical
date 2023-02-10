@@ -25,11 +25,25 @@ func TestHandler(t *testing.T) {
 		}
 	}
 
-	var errs = []struct {
+	errs := []struct {
 		operand  Evaluable
 		expected error
 	}{
 		{Val("bogus"), errors.New("logical NOT expression's operand must be evaluated to boolean value")},
+	}
+
+	for _, test := range errs {
+		c, _ := New("NOT", test.operand)
+		if _, err := c.Evaluate(map[string]any{}); err.Error() != test.expected.Error() {
+			t.Errorf("input (%v): expected %v, got %v", test.operand, test.expected, err)
+		}
+	}
+
+	errs = []struct {
+		operand  Evaluable
+		expected error
+	}{
+		{Invalid(), errors.New("invalid")},
 	}
 
 	for _, test := range errs {
@@ -59,6 +73,7 @@ func TestSimplify(t *testing.T) {
 		{Val(false), true, nil},
 		{Ref("RefA"), false, nil},
 		{Ref("Missing"), nil, exp(Ref("Missing"))},
+		{Invalid(), nil, nil},
 	}
 
 	for _, test := range tests {

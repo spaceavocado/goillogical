@@ -21,13 +21,13 @@ func handler(ctx e.Context, operands []e.Evaluable) (bool, error) {
 }
 
 func simplify(operator string, ctx e.Context, operands []e.Evaluable) (any, e.Evaluable) {
-	res, e := operands[0].Simplify(ctx)
-	if b, ok := res.(bool); ok {
-		return !b, nil
+	res, eval := operands[0].Simplify(ctx)
+	if typed, ok := res.(bool); ok {
+		return !typed, nil
 	}
 
-	if e != nil {
-		e, _ := New(operator, e)
+	if eval != nil {
+		e, _ := New(operator, eval)
 		return nil, e
 	}
 
