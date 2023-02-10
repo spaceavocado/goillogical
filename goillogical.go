@@ -213,6 +213,10 @@ func New(opts ...Option) Goillogical {
 		opt(i)
 	}
 
+	for _, op := range i.opts.OperatorMapping {
+		i.opts.Serialize.Collection.EscapedOperators[op] = true
+	}
+
 	i.parser = p.New(&i.opts)
 	return i
 }
