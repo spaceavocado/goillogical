@@ -6,6 +6,9 @@ A micro conditional javascript engine used to parse the raw logical and comparis
 
 <p align="center">
 <a href="https://goreportcard.com/report/github.com/spaceavocado/goillogical"><img class="badge" tag="https://github.com/spaceavocado/goillogical" src="https://goreportcard.com/badge/github.com/spaceavocado/goillogical"></a>
+<a href="https://codecov.io/gh/spaceavocado/goillogical" >
+<img src="https://codecov.io/gh/spaceavocado/goillogical/branch/master/graph/badge.svg?token=16C3FQ0IA2"/>
+</a>
 <a href="https://godoc.org/github.com/spaceavocado/goillogical"><img alt="Go Doc" src="https://godoc.org/github.com/spaceavocado/goillogical?status.svg"></a>
 </p>
 
