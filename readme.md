@@ -12,6 +12,10 @@ A micro conditional javascript engine used to parse the raw logical and comparis
 <a href="https://godoc.org/github.com/spaceavocado/goillogical"><img alt="Go Doc" src="https://godoc.org/github.com/spaceavocado/goillogical?status.svg"></a>
 </p>
 
+Other implementations:
+- [TS/JS](https://github.com/spaceavocado/illogical)
+- [Python](https://github.com/spaceavocado/pyillogical)
+
 ## About
 
 This project has been developed to provide Go(lang) implementation of [spaceavocado/illogical](https://github.com/spaceavocado/illogical).
