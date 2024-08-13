@@ -15,6 +15,7 @@ A micro conditional javascript engine used to parse the raw logical and comparis
 Other implementations:
 - [TS/JS](https://github.com/spaceavocado/illogical)
 - [Python](https://github.com/spaceavocado/pyillogical)
+- [C#](https://github.com/spaceavocado/cillogical)
 
 ## About
 
