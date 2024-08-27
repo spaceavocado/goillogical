@@ -1,6 +1,7 @@
 package logical
 
 import (
+	"errors"
 	"fmt"
 
 	e "github.com/spaceavocado/goillogical/evaluable"
@@ -53,7 +54,7 @@ func Evaluate(ctx e.Context, o e.Evaluable) (bool, error) {
 	case bool:
 		return typed, nil
 	default:
-		return false, nil
+		return false, errors.New("invalid evaluated operand, must be boolean value")
 	}
 }
 

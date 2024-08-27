@@ -9,8 +9,10 @@ import (
 )
 
 func handler(ctx e.Context, operands []e.Evaluable) (bool, error) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	for _, o := range operands {
-		res, err := l.Evaluate(ctx, o)
+		res, err := l.Evaluate(flattenContext, o)
 		if err != nil {
 			return false, err
 		}
@@ -22,9 +24,11 @@ func handler(ctx e.Context, operands []e.Evaluable) (bool, error) {
 }
 
 func simplify(operator string, ctx e.Context, operands []e.Evaluable, notOp string) (any, e.Evaluable) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	simplified := []e.Evaluable{}
 	for _, o := range operands {
-		res, e := o.Simplify(ctx)
+		res, e := o.Simplify(flattenContext)
 		if b, ok := res.(bool); ok {
 			if b {
 				return false, nil

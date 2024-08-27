@@ -46,13 +46,21 @@ func DefaultSerializeOptions() SerializeOptions {
 type DataType string
 
 const (
-	Undefined DataType = "Undefined"
-	Number    DataType = "Number"
-	Integer   DataType = "Integer"
-	Float     DataType = "Float"
-	String    DataType = "String"
-	Boolean   DataType = "Boolean"
+	Undefined   DataType = "Undefined"
+	Unsupported DataType = "Unsupported"
+	Number      DataType = "Number"
+	Integer     DataType = "Integer"
+	Float       DataType = "Float"
+	String      DataType = "String"
+	Boolean     DataType = "Boolean"
 )
+
+const NESTED_REFERENCE_RX string = `{([^{}]+)}`
+const DATA_TYPE_RX string = `^.+\.\(([A-Z][a-z]+)\)$`
+const DATA_TYPE_TRIM_RX string = `.\(([A-Z][a-z]+)\)$`
+const FLOAT_TRIM_RX string = ""
+const FLOAT_RX string = `^\d+\.\d+$`
+const INT_RX string = `^0$|^[1-9]\d*$`
 
 type reference struct {
 	addr    string
@@ -63,7 +71,11 @@ type reference struct {
 }
 
 func (r reference) Evaluate(ctx e.Context) (any, error) {
-	_, res, err := evaluate(ctx, r.path, r.dt)
+	if ctx == nil {
+		return nil, nil
+	}
+
+	_, _, res, err := evaluate(e.FlattenContext(ctx), r.path, r.dt)
 	return res, err
 }
 
@@ -78,8 +90,12 @@ func (r reference) Serialize() any {
 }
 
 func (r reference) Simplify(ctx e.Context) (any, e.Evaluable) {
-	path, res, _ := evaluate(ctx, r.path, r.dt)
-	if res != nil || isIgnoredPath(path, r.simOpts) {
+	if ctx == nil {
+		return nil, &r
+	}
+
+	found, path, res, _ := evaluate(e.FlattenContext(ctx), r.path, r.dt)
+	if found && !isIgnoredPath(path, r.simOpts) {
 		return res, nil
 	}
 	return nil, &r
@@ -90,7 +106,7 @@ func (r reference) String() string {
 }
 
 func getDataType(path string) (DataType, error) {
-	re := regexp.MustCompile(`^.+\.\(([A-Z][a-z]+)\)$`)
+	re := regexp.MustCompile(DATA_TYPE_RX)
 	matches := re.FindStringSubmatch(path)
 	if len(matches) > 1 {
 		switch matches[1] {
@@ -105,7 +121,7 @@ func getDataType(path string) (DataType, error) {
 		case "Boolean":
 			return Boolean, nil
 		default:
-			return Undefined, fmt.Errorf("unsupported \"%s\" type casting", matches[1])
+			return Unsupported, fmt.Errorf("unsupported \"%s\" type casting", matches[1])
 		}
 	}
 	return Undefined, nil
@@ -128,13 +144,13 @@ func isIgnoredPath(path string, opts *SimplifyOptions) bool {
 }
 
 func trimDataType(path string) string {
-	re := regexp.MustCompile(`.\(([A-Z][a-z]+)\)$`)
+	re := regexp.MustCompile(DATA_TYPE_TRIM_RX)
 	return re.ReplaceAllString(path, "")
 }
 
 func toNumber(val any) (any, error) {
-	reFloat := regexp.MustCompile(`^\d+\.\d+$`)
-	reInt := regexp.MustCompile(`^0$|^[1-9]\d*$`)
+	reFloat := regexp.MustCompile(FLOAT_RX)
+	reInt := regexp.MustCompile(INT_RX)
 
 	fromString := func(val string) (any, error) {
 		if reFloat.MatchString(val) {
@@ -244,48 +260,52 @@ func toBoolean(val any) (bool, error) {
 	}
 }
 
-func contextLookup(ctx e.Context, path string) (string, any) {
-	rxPath := regexp.MustCompile(`{([^{}]+)}`)
+func contextLookup(flattenContext e.Context, path string) (bool, string, any) {
+	if flattenContext == nil {
+		return false, path, nil
+	}
+
+	rxPath := regexp.MustCompile(NESTED_REFERENCE_RX)
 	for match := rxPath.FindStringSubmatchIndex(path); len(match) > 0; {
-		_, val := contextLookup(ctx, string(path[match[2]:match[3]]))
-		if val == nil {
-			return path, nil
+		found, _, val := contextLookup(flattenContext, string(path[match[2]:match[3]]))
+		if !found {
+			return false, path, nil
 		}
 		path = path[0:match[0]] + fmt.Sprintf("%v", val) + path[match[1]:]
 		match = rxPath.FindStringSubmatchIndex(path)
 	}
 
-	if val, ok := ctx[path]; ok {
-		return path, val
+	if val, ok := flattenContext[path]; ok {
+		return true, path, val
 	}
 
-	return path, nil
+	return false, path, nil
 }
 
-func evaluate(ctx e.Context, path string, dt DataType) (string, any, error) {
-	resolvedPath, value := contextLookup(ctx, path)
+func evaluate(ctx e.Context, path string, dt DataType) (bool, string, any, error) {
+	found, resolvedPath, value := contextLookup(e.FlattenContext(ctx), path)
 
-	if value == nil {
-		return resolvedPath, nil, nil
+	if !found || value == nil {
+		return found, resolvedPath, nil, nil
 	}
 
 	switch dt {
 	case Number:
 		val, err := toNumber(value)
-		return resolvedPath, val, err
+		return found, resolvedPath, val, err
 	case Integer:
 		val, err := toInteger(value)
-		return resolvedPath, val, err
+		return found, resolvedPath, val, err
 	case Float:
 		val, err := toFloat(value)
-		return resolvedPath, val, err
+		return found, resolvedPath, val, err
 	case Boolean:
 		val, err := toBoolean(value)
-		return resolvedPath, val, err
+		return found, resolvedPath, val, err
 	case String:
-		return resolvedPath, toString(value), nil
+		return found, resolvedPath, toString(value), nil
 	default:
-		return resolvedPath, value, nil
+		return found, resolvedPath, value, nil
 	}
 }
 

@@ -161,7 +161,7 @@ func TestSimplify(t *testing.T) {
 		eval  any
 	}{
 		{"$refJ", nil, ref("refJ")},
-		{"$ignored", nil, nil},
+		{"$ignored", nil, ref("ignored")},
 		{"$refA", 1, nil},
 		{"$refB.refB1", 2, nil},
 		{"$refC.{refJ}", nil, ref("refC.{refJ}")},

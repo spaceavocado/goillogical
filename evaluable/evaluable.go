@@ -8,6 +8,8 @@ import (
 	"reflect"
 )
 
+const FlattenContextKey string = "_flattenContext"
+
 // Evaluation data context is used to provide the expression with variable references,
 // i.e. this allows for the dynamic expressions. The data context is object with
 // properties used as the references keys, and its values as reference values.
@@ -130,7 +132,17 @@ func IsEvaluatedPrimitive(value any) bool {
 //			"address.country": "Canada",
 //		}
 func FlattenContext(ctx Context) map[string]any {
+	if ctx == nil {
+		return nil
+	}
+
+	if value, ok := ctx[FlattenContextKey]; ok && value == FlattenContextKey {
+		return ctx
+	}
+
 	res := make(map[string]any)
+	res[FlattenContextKey] = FlattenContextKey
+
 	var lookup func(p any, path string)
 
 	joinPath := func(a string, b string) string {

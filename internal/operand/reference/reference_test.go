@@ -94,6 +94,7 @@ func TestGetDataType(t *testing.T) {
 	}{
 		{"ref", Undefined},
 		{"ref.(X)", Undefined},
+		{"ref.(Bogus)", Unsupported},
 		{"ref.(String)", String},
 		{"ref.(Number)", Number},
 		{"ref.(Integer)", Integer},
@@ -122,7 +123,6 @@ func TestTrimDataType(t *testing.T) {
 		{"ref", "ref"},
 		{"ref.(X)", "ref.(X)"},
 		{"ref.(String)", "ref"},
-		{"ref.(Nonsense)", "ref"},
 	}
 
 	for _, test := range tests {
@@ -290,7 +290,7 @@ func TestToString(t *testing.T) {
 }
 
 func TestContextLookup(t *testing.T) {
-	ctx := FlattenContext(map[string]any{
+	ctx := map[string]any{
 		"refA": 1,
 		"refB": map[string]any{
 			"refB1": 2,
@@ -303,39 +303,40 @@ func TestContextLookup(t *testing.T) {
 		"refF": "A",
 		"refG": "1",
 		"refH": "1.1",
-	})
+	}
 
 	var tests = []struct {
 		input string
+		found bool
 		path  string
 		value any
 	}{
-		{"UNDEFINED", "UNDEFINED", nil},
-		{"refA", "refA", 1},
-		{"refB.refB1", "refB.refB1", 2},
-		{"refB.{refC}", "refB.refB1", 2},
-		{"refB.{UNDEFINED}", "refB.{UNDEFINED}", nil},
-		{"refB.{refB.refB2}", "refB.refB1", 2},
-		{"refB.{refB.{refD}}", "refB.refB1", 2},
-		{"refE[0]", "refE[0]", 1},
-		{"refE[2]", "refE[2]", nil},
-		{"refE[1][0]", "refE[1][0]", 2},
-		{"refE[1][3]", "refE[1][3]", nil},
-		{"refE[{refA}][0]", "refE[1][0]", 2},
-		{"refE[{refA}][{refB.refB1}]", "refE[1][2]", 4},
-		{"ref{refF}", "refA", 1},
-		{"ref{UNDEFINED}", "ref{UNDEFINED}", nil},
+		{"UNDEFINED", false, "UNDEFINED", nil},
+		{"refA", true, "refA", 1},
+		{"refB.refB1", true, "refB.refB1", 2},
+		{"refB.{refC}", true, "refB.refB1", 2},
+		{"refB.{UNDEFINED}", false, "refB.{UNDEFINED}", nil},
+		{"refB.{refB.refB2}", true, "refB.refB1", 2},
+		{"refB.{refB.{refD}}", true, "refB.refB1", 2},
+		{"refE[0]", true, "refE[0]", 1},
+		{"refE[2]", false, "refE[2]", nil},
+		{"refE[1][0]", true, "refE[1][0]", 2},
+		{"refE[1][3]", false, "refE[1][3]", nil},
+		{"refE[{refA}][0]", true, "refE[1][0]", 2},
+		{"refE[{refA}][{refB.refB1}]", true, "refE[1][2]", 4},
+		{"ref{refF}", true, "refA", 1},
+		{"ref{UNDEFINED}", false, "ref{UNDEFINED}", nil},
 	}
 
 	for _, test := range tests {
-		if path, value := contextLookup(ctx, test.input); path != test.path || value != test.value {
-			t.Errorf("input (%v): expected %v/%v, got %v/%v", test.input, test.path, test.value, path, value)
+		if found, path, value := contextLookup(FlattenContext(ctx), test.input); found != test.found || path != test.path || value != test.value {
+			t.Errorf("input (%v): expected %v/%v/%v, got %v/%v/%v", test.input, test.found, test.path, test.value, found, path, value)
 		}
 	}
 }
 
 func TestEvaluate(t *testing.T) {
-	ctx := FlattenContext(map[string]any{
+	ctx := map[string]any{
 		"refA": 1,
 		"refB": map[string]any{
 			"refB1": 2,
@@ -348,7 +349,7 @@ func TestEvaluate(t *testing.T) {
 		"refF": func() {},
 		"refG": "1",
 		"refH": "1.1",
-	})
+	}
 
 	tests := []struct {
 		path  string
@@ -366,7 +367,7 @@ func TestEvaluate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if _, value, err := evaluate(ctx, test.path, test.dt); value != test.value || err != nil {
+		if _, _, value, err := evaluate(ctx, test.path, test.dt); value != test.value || err != nil {
 			t.Errorf("input (%v, %v): expected %v, got %v", test.path, test.dt, test.value, value)
 		}
 	}
@@ -442,7 +443,7 @@ func TestSimplify(t *testing.T) {
 		IgnoredPaths:   []string{"ignored"},
 		IgnoredPathsRx: []regexp.Regexp{*regexp.MustCompile("^refC")},
 	}
-	ctx := FlattenContext(map[string]any{
+	ctx := map[string]any{
 		"refA": 1,
 		"refB": map[string]any{
 			"refB1": 2,
@@ -455,18 +456,17 @@ func TestSimplify(t *testing.T) {
 		"refF": func() {},
 		"refG": "1",
 		"refH": "1.1",
-	})
+	}
 
 	tests := []struct {
 		input string
 		value any
 		e     any
 	}{
-		{"refJ", nil, ref("refJ")},
-		{"ignored", nil, nil},
 		{"refA", 1, nil},
-		{"refB.{refJ}", nil, ref("refB.{refJ}")},
-		{"refC.{refJ}", nil, nil},
+		{"ignored", nil, ref("ignored")},
+		{"refC.refB1", nil, ref("refC.refB1")},
+		{"ref", nil, ref("ref")},
 	}
 
 	for _, test := range tests {

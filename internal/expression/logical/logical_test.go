@@ -18,7 +18,6 @@ func TestEvaluate(t *testing.T) {
 	}{
 		{"AND", []Evaluable{Val(true), Val(true)}, true},
 		{"AND", []Evaluable{Val(false), Val(false)}, false},
-		{"AND", []Evaluable{Val("val"), Val(true)}, false},
 	}
 
 	handler := func(ctx Context, operands []Evaluable) (bool, error) {
