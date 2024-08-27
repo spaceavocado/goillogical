@@ -2,7 +2,7 @@
 
 A micro conditional javascript engine used to parse the raw logical and comparison expressions, evaluate the expression in the given data context, and provide access to a text form of the given expressions.
 
-> Revision: Feb 7, 2023.
+> Revision: Aug 27, 2024.
 
 <p align="center">
 <a href="https://goreportcard.com/report/github.com/spaceavocado/goillogical"><img class="badge" tag="https://github.com/spaceavocado/goillogical" src="https://goreportcard.com/badge/github.com/spaceavocado/goillogical"></a>
@@ -16,6 +16,7 @@ Other implementations:
 - [TS/JS](https://github.com/spaceavocado/illogical)
 - [Python](https://github.com/spaceavocado/pyillogical)
 - [C#](https://github.com/spaceavocado/cillogical)
+- [Java](https://github.com/spaceavocado/jillogical)
 
 ## About
 

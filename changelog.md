@@ -1,5 +1,10 @@
 # (go)illogical changelog
 
+## v1.0.3
+- Updated XOR implementation
+- Code cleanup
+- Bump goland version to 1.23
+
 ## 1.0.2
 
 - Improved documentation.

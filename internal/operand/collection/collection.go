@@ -25,9 +25,11 @@ type collection struct {
 }
 
 func (c collection) Evaluate(ctx e.Context) (any, error) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	res := make([]any, len(c.items))
 	for i, item := range c.items {
-		val, err := item.Evaluate((ctx))
+		val, err := item.Evaluate((flattenContext))
 		if err != nil {
 			return nil, err
 		}
@@ -50,9 +52,11 @@ func (c collection) Serialize() any {
 }
 
 func (c collection) Simplify(ctx e.Context) (any, e.Evaluable) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	res := []any{}
 	for _, i := range c.items {
-		val, e := i.Simplify(ctx)
+		val, e := i.Simplify(flattenContext)
 		if e != nil {
 			return nil, &c
 		}

@@ -19,11 +19,13 @@ type comparison struct {
 }
 
 func (c comparison) Evaluate(ctx e.Context) (any, error) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	evaluated := make([]any, len(c.operands))
 	for i, e := range c.operands {
-		val, err := e.Evaluate(ctx)
+		val, err := e.Evaluate(flattenContext)
 		if err != nil {
-			return nil, err
+			return false, err
 		}
 		evaluated[i] = val
 	}
@@ -39,9 +41,11 @@ func (c comparison) Serialize() any {
 }
 
 func (c comparison) Simplify(ctx e.Context) (any, e.Evaluable) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	res := []any{}
 	for _, o := range c.operands {
-		val, e := o.Simplify(ctx)
+		val, e := o.Simplify(flattenContext)
 		if e != nil {
 			return nil, &c
 		}

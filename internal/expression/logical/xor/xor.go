@@ -9,32 +9,39 @@ import (
 	not "github.com/spaceavocado/goillogical/internal/expression/logical/not"
 )
 
-func xor(a, b bool) bool {
-	return (a || b) && !(a && b)
-}
-
 func handler(ctx e.Context, operands []e.Evaluable) (bool, error) {
-	var out bool
+	var flattenContext = e.FlattenContext(ctx)
+	var xor bool
+
 	for i, o := range operands {
-		res, err := l.Evaluate(ctx, o)
+		res, err := l.Evaluate(flattenContext, o)
 		if err != nil {
 			return false, err
 		}
 
 		if i == 0 {
-			out = res
-		} else {
-			out = xor(out, res)
+			xor = res
+			continue
+		}
+
+		if xor && res {
+			return false, nil
+		}
+
+		if res {
+			xor = true
 		}
 	}
-	return out, nil
+	return xor, nil
 }
 
 func simplify(operator string, ctx e.Context, operands []e.Evaluable, notOp string, norOp string) (any, e.Evaluable) {
+	var flattenContext = e.FlattenContext(ctx)
+
 	truthy := 0
 	simplified := []e.Evaluable{}
 	for _, o := range operands {
-		res, e := o.Simplify(ctx)
+		res, e := o.Simplify(flattenContext)
 		if b, ok := res.(bool); ok {
 			if b {
 				truthy++
