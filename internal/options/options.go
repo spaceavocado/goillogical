@@ -32,7 +32,7 @@ func DefaultOperatorMapping() e.OperatorMapping {
 		e.Ge:      ">=",
 		e.Lt:      "<",
 		e.Le:      "<=",
-		e.Nil:     "NIL",
+		e.Nil:     "NONE",
 		e.Present: "PRESENT",
 		e.In:      "IN",
 		e.Nin:     "NOT IN",

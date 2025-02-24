@@ -31,7 +31,7 @@ func TestEvaluate(t *testing.T) {
 		{[]any{"==", 1, 1}, true},
 		{[]any{"==", "$refA", "resolvedA"}, true},
 		{[]any{"AND", []any{"==", 1, 1}, []any{"!=", 2, 1}}, true},
-		{[]any{"NIL", "$refB"}, true},
+		{[]any{"NONE", "$refB"}, true},
 		{[]any{"PRESENT", "$refB"}, false},
 	}
 

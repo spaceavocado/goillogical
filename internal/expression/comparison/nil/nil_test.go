@@ -23,7 +23,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		c, _ := New("NIL", test.eval)
+		c, _ := New("NONE", test.eval)
 		if output, err := c.Evaluate(map[string]any{}); output != test.expected || err != nil {
 			t.Errorf("input (%v): expected %v, got %v/%v", test.eval.String(), test.expected, output, err)
 		}

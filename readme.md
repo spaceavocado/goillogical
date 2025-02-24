@@ -17,6 +17,7 @@ Other implementations:
 - [Python](https://github.com/spaceavocado/pyillogical)
 - [C#](https://github.com/spaceavocado/cillogical)
 - [Java](https://github.com/spaceavocado/jillogical)
+- [Odin](https://github.com/spaceavocado/oillogical)
 
 ## About
 
@@ -127,7 +128,7 @@ i.Evaluate([]any{"==", 5, 5}, ctx)
 i.Evaluate([]any{"==", "circle", "circle"}, ctx)
 i.Evaluate([]any{"==", true, true}, ctx)
 i.Evaluate([]any{"==", "$name", "peter"}, ctx)
-i.Evaluate([]any{"NIL", "$RefA"}, ctx)
+i.Evaluate([]any{"NONE", "$RefA"}, ctx)
 
 // Logical expression
 i.Evaluate([]any{"AND", []any{"==", 5, 5}, []any{"==", 10, 10}}, ctx)
@@ -150,7 +151,7 @@ i.Statement([]any{"==", 5, 5}) // (5 == 5)
 i.Statement([]any{"==", "circle", "circle"}) // ("circle" == "circle")
 i.Statement([]any{"==", true, true}) // (true == true)
 i.Statement([]any{"==", "$name", "peter"}) // ({name} == "peter")
-i.Statement([]any{"NIL", "$RefA"}) // ({RefA} <is nil>)
+i.Statement([]any{"NONE", "$RefA"}) // ({RefA} <is nil>)
 
 // Logical expression
 
@@ -559,15 +560,15 @@ i.Evaluate([]any{"OVERLAP", []string{"circle", "square", "triangle"}, []string{"
 
 #### Nil
 
-Expression format: `["NIL", `[Reference Operand](#reference)`]`.
+Expression format: `["NONE", `[Reference Operand](#reference)`]`.
 
 ```json
-["NIL", "$RefA"]
+["NONE", "$RefA"]
 ```
 
 ```go
-i.Evaluate([]any{"NIL", "RefA"}, map[string]any{}) // true
-i.Evaluate([]any{"NIL", "RefA"}, map[string]any{"RefA": 10}) // false
+i.Evaluate([]any{"NONE", "RefA"}, map[string]any{}) // true
+i.Evaluate([]any{"NONE", "RefA"}, map[string]any{"RefA": 10}) // false
 ```
 
 #### Present
@@ -810,7 +811,7 @@ operatorMapping := e.OperatorMapping{
   e.Prefix: "PREFIX",
   e.Suffix: "SUFFIX",
   e.Overlap:, "OVERLAP",
-  e.Nil: "NIL",
+  e.Nil: "NONE",
   e.Present: "PRESENT",
   // Logical
   e.And: "AND",
