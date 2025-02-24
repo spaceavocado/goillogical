@@ -190,7 +190,7 @@ func WithReferenceSimplifyOptions(o SimplifyOptions) Option {
 //		e.Prefix: "PREFIX",
 //		e.Suffix: "SUFFIX",
 //		e.Overlap:, "OVERLAP",
-//		e.Nil: "NIL",
+//		e.Nil: "NONE",
 //		e.Present: "PRESENT",
 //		// Logical
 //		e.And: "AND",
